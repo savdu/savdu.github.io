@@ -41,6 +41,29 @@
             /* text-transform: lowercase; */
         }
 
+        .clue-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        .name-input {
+            width: 80px;
+            margin-right: 10px;
+            padding: 4px 6px;
+            border: 1px solid white;
+            border-radius: 5px;
+            background: transparent;
+            color: white;
+        }
+
+        .name-input::placeholder {
+            color: #ffdccb;
+            font-family: "Space Mono", monospace;
+            font-style: italic;
+        }
+
         @keyframes gradientShift {
             0% {
                 background-position: 0% 50%;
@@ -194,7 +217,14 @@
         <!-- Menu Page -->
         <div class="page" id="menu">
             <h1>drinks on us</h1>
-            <p>Curated by bartender Kristy.</p>
+            <p><i>Curated by bartender Kristy.</i></p>
+            <p><b>Earth</b></p>
+            <p>Drink ingredients here</p>
+            <p><b>Wind</b></p>
+            <p>Drink ingredients here</p>
+            <p><b>Fire</b></p>
+            <p>Drink ingredients here</p>
+
             <br>
             <a href="#" class="btn" onclick="showPage('home')">back</a>
         </div>
@@ -212,8 +242,8 @@
         <!-- Feeling Social Page -->
         <div class="page" id="social">
             <h1>find your people</h1>
-            <p>Find the people below. Check off 10 for an Earth, Wind and Fire sticker, or as many as possible for
-                bragging rights.</p>
+            <p>Meet as many as possible for bragging rights.</p>
+            <div id="scavenger-hunt"></div>
             <br>
             <a href="#" class="btn" onclick="showPage('home')">back</a>
         </div>
@@ -245,6 +275,50 @@
             <br>
             <a href="#" class="btn" onclick="showPage('home')">back</a>
         </div>
+
+        <script>
+            const clues = [
+                "Recently spent 3 months in Brussels",
+                "Olympic skier",
+                "Knows the dance to Gnarly",
+                "Running a half marathon to train for a full",
+                "Favorite country artist is Shania Twain"
+            ];
+
+            // Load saved progress
+            const savedData = JSON.parse(localStorage.getItem('scavengerHuntNames')) || {};
+
+            const container = document.getElementById('scavenger-hunt');
+
+            clues.forEach((clue, index) => {
+                const row = document.createElement('div');
+                row.className = 'clue-row';
+
+                const nameValue = savedData[index] || '';
+
+                row.innerHTML = `
+                <input type="text" placeholder="Name" class="name-input" value="${nameValue}">
+                <span class="clue-text">${clue}</span>
+              `;
+
+                container.appendChild(row);
+
+                // Save progress when typing
+                const nameInput = row.querySelector('.name-input');
+                nameInput.addEventListener('input', () => {
+                    saveProgress();
+                });
+            });
+
+            function saveProgress() {
+                const data = {};
+                document.querySelectorAll('.clue-row').forEach((row, i) => {
+                    data[i] = row.querySelector('.name-input').value;
+                });
+                localStorage.setItem('scavengerHuntNames', JSON.stringify(data));
+            }
+        </script>
+
 
         <script>
             function showPage(pageId) {
