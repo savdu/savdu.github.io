@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>19th night of september</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+    <style>
+        #home h1 {
+            margin-top: 0;
+            /* remove extra top space */
+        }
+
+        #home .emoji {
+            margin-bottom: 0.8em;
+            /* tighter spacing below emoji */
+        }
+
+        body {
+            margin: 0;
+            font-family: "Space Mono", monospace;
+            background: linear-gradient(135deg, #914cff, #ff5331, #fdbb2d);
+            background-size: 300% 300%;
+            animation: gradientShift 10s ease infinite;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            /* min-height: 100vh; */
+            text-align: center;
+            padding: 10px 50px;
+            font-size: 0.8rem;
+            /* text-transform: lowercase; */
+        }
+
+        .clue-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            text-align: left;
+            font-size: 0.7rem;
+        }
+
+        .name-input {
+            width: 70px;
+            margin-right: 10px;
+            padding: 4px 6px;
+            border: 1px solid white;
+            border-radius: 5px;
+            background: transparent;
+            color: white;
+        }
+
+        .name-input::placeholder {
+            color: #ffdccb;
+            font-family: "Space Mono", monospace;
+            font-style: italic;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        h1 {
+            font-family: "Silkscreen", sans-serif;
+            font-size: 1.4rem;
+            /* Reduced font size */
+            margin-bottom: 10px;
+            margin-top: 0px;
+            /* Reduced space between title and buttons */
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .emoji {
+            font-size: 2.5rem;
+            /* Slightly smaller emoji */
+            margin-bottom: 1.5em;
+            /* Reduced vertical spacing */
+            animation: discoSpin 4s linear infinite;
+            display: inline-block;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* vertical center */
+            align-items: center;
+            /* horizontal center */
+            min-height: 100vh;
+            /* required for vertical centering */
+            padding: 0 0.5rem;
+            /* side margins for breathing room */
+            text-align: center;
+        }
+
+
+        @keyframes discoSpin {
+            0% {
+                transform: rotate(0deg) scale(1);
+            }
+
+            50% {
+                transform: rotate(180deg) scale(1.2);
+            }
+
+            100% {
+                transform: rotate(360deg) scale(1);
+            }
+        }
+
+
+        .btn-container {
+            text-align: center;
+            /* center all inline-block buttons */
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            /* width: fit-content; */
+            /* display: inline-block; */
+            max-width: 280px;
+            /* background: rgba(255, 255, 255, 0.85); */
+            color: black;
+            text-decoration: none;
+            padding: 5px;
+            margin: 8px auto;
+            /* Slightly less vertical margin */
+            border-radius: 12px;
+            font-size: 0.8rem;
+            /* Reduced font size */
+            /* font-weight: bold; */
+            font-family: "Space Mono", monospace;
+            /* transition: background 0.2s ease, transform 0.1s ease; */
+
+            color: white;
+            background: transparent;
+            border: 2px solid white;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            animation: pulseBorder 2.5s ease-in-out infinite;
+
+        }
+
+        /* Optional: animated border “pulse” */
+        @keyframes pulseBorder {
+            0% {
+                box-shadow: 0 0 8px 1px white;
+            }
+
+            50% {
+                box-shadow: 0 0 16px 2px white;
+            }
+
+            100% {
+                box-shadow: 0 0 8px 1px white;
+            }
+        }
+
+        /* Hover effect */
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 8px 2px white;
+            /* glow around the outline */
+        }
+
+        /* Page transitions */
+        .page {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .page.active {
+            display: block;
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- Home Page -->
+        <div class="page active" id="home">
+            <h1>do you remember the 19th night of september?</h1>
+            <div class="emoji">🪩</div>
+
+            <div class="btn-container">
+                <a href="#" class="btn" onclick="showPage('menu')">menu</a>
+                <a href="#" class="btn" onclick="showPage('vote')">feeling judgy?</a>
+                <a href="#" class="btn" onclick="showPage('social')">feeling social?</a>
+                <a href="#" class="btn" onclick="showPage('shy')">feeling shy?</a>
+                <a href="#" class="btn" onclick="showPage('beautiful')">feeling beautiful?</a>
+                <a href="#" class="btn" onclick="showPage('breather')">feeling like you want to take a break from the
+                    party and yap with michael in his room?</a>
+            </div>
+        </div>
+
+        <!-- Menu Page -->
+        <div class="page" id="menu">
+            <h1>drinks on us</h1>
+            <p><i>Curated by bartender Kristy.</i></p>
+            <p><b>Earth</b></p>
+            <p>Drink ingredients here</p>
+            <p><b>Wind</b></p>
+            <p>Drink ingredients here</p>
+            <p><b>Fire</b></p>
+            <p>Drink ingredients here</p>
+
+            <br>
+            <a href="#" class="btn" onclick="showPage('home')">back</a>
+        </div>
+
+        <!-- Vote Page -->
+        <div class="page" id="vote">
+            <h1>vote for best dressed</h1>
+            <p>Grab a sticker from the entryway table. Bestow it upon the best dressed. If you change your mind,
+                dramatically take your sticker back and re-bestow it.</p>
+            <p>Final tallies will be counted at 11pm.</p>
+            <br>
+            <a href="#" class="btn" onclick="showPage('home')">back</a>
+        </div>
+
+        <!-- Feeling Social Page -->
+        <div class="page" id="social">
+            <h1>find your people</h1>
+            <p>Meet as many as possible for bragging rights.</p>
+            <div id="scavenger-hunt"></div>
+            <br>
+            <a href="#" class="btn" onclick="showPage('home')">back</a>
+        </div>
+
+        <!-- Feeling Shy Page -->
+        <div class="page" id="shy">
+            <h1>assisted introductions</h1>
+            <p>Seek out Sav to be introduced to a new friend, flirt, or foe.</p>
+            <p>Use the phrase, "Sav, I'm feeling shy."</p>
+            <br>
+            <a href="#" class="btn" onclick="showPage('home')">back</a>
+        </div>
+
+        <!-- Feeling Beautiful Page -->
+        <div class="page" id="beautiful">
+            <h1>yes you are</h1>
+            <p>Ponder the question: <i>when did you first realize you were beautiful?</i></p>
+            <p>Write your answer on a sticky note and add it to the poster across the bathroom.</p>
+            <p>Perhaps you will find yourself in a future song ;)</p>
+            <br>
+            <a href="#" class="btn" onclick="showPage('home')">back</a>
+        </div>
+
+        <!-- Feeling Breather Page -->
+        <div class="page" id="breather">
+            <h1>take a breather</h1>
+            <p>Look for the man wearing disco pants. Use the phrase, "Michael, I need a breather."</p>
+            <p>If he can't be found, knock on his door and enter his room.</p>
+            <p><i>(Max capacity: 3)</i></p>
+            <br>
+            <a href="#" class="btn" onclick="showPage('home')">back</a>
+        </div>
+
+        <script>
+            const clues = [
+                "Recently spent 3 months in Brussels (ask about their PowerPoint)",
+                "Once rallied with Roger Federer",
+                "Knows the dance to Gnarly",
+                "Favorite country artist is Shania Twain"
+            ];
+
+            // Load saved progress
+            const savedData = JSON.parse(localStorage.getItem('scavengerHuntNames')) || {};
+
+            const container = document.getElementById('scavenger-hunt');
+
+            clues.forEach((clue, index) => {
+                const row = document.createElement('div');
+                row.className = 'clue-row';
+
+                const nameValue = savedData[index] || '';
+
+                row.innerHTML = `
+                <input type="text" placeholder="Name" class="name-input" value="${nameValue}">
+                <span class="clue-text">${clue}</span>
+              `;
+
+                container.appendChild(row);
+
+                // Save progress when typing
+                const nameInput = row.querySelector('.name-input');
+                nameInput.addEventListener('input', () => {
+                    saveProgress();
+                });
+            });
+
+            function saveProgress() {
+                const data = {};
+                document.querySelectorAll('.clue-row').forEach((row, i) => {
+                    data[i] = row.querySelector('.name-input').value;
+                });
+                localStorage.setItem('scavengerHuntNames', JSON.stringify(data));
+            }
+        </script>
+
+
+        <script>
+            function showPage(pageId) {
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.getElementById(pageId).classList.add('active');
+            }
+        </script>
+    </div>
+</body>
+
+</html>
