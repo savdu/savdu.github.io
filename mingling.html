@@ -12,33 +12,30 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
         rel="stylesheet">
+
     <style>
         #home h1 {
             margin-top: 0;
-            /* remove extra top space */
         }
 
         #home .emoji {
             margin-bottom: 0.8em;
-            /* tighter spacing below emoji */
         }
 
         body {
             margin: 0;
             font-family: "Space Mono", monospace;
-            background: linear-gradient(135deg, #c64cff, #cc1a99, #eb1d1d);
+            background: linear-gradient(135deg, #eabbff, #ffb5ea, #ffbfbf);
             background-size: 300% 300%;
             animation: gradientShift 10s ease infinite;
-            color: white;
+            color: rgb(57, 14, 74);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            /* min-height: 100vh; */
             text-align: center;
             padding: 10px 50px;
             font-size: 0.8rem;
-            /* text-transform: lowercase; */
         }
 
         .clue-row {
@@ -53,49 +50,36 @@
             width: 70px;
             margin-right: 10px;
             padding: 4px 6px;
-            border: 1px solid white;
+            border: 1px solid rgb(57, 14, 74);;
             border-radius: 5px;
             background: transparent;
-            color: white;
+            color: rgb(57, 14, 74);
         }
 
         .name-input::placeholder {
-            color: #ffdccb;
+            color: rgb(59, 46, 64);
             font-family: "Space Mono", monospace;
             font-style: italic;
         }
 
         @keyframes gradientShift {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         h1 {
             font-family: "Silkscreen", sans-serif;
             font-size: 1.4rem;
-            /* Reduced font size */
             margin-bottom: 10px;
             margin-top: 0px;
-            /* Reduced space between title and buttons */
             letter-spacing: 1px;
             text-transform: uppercase;
         }
 
         .emoji {
             font-size: 2.5rem;
-            /* Slightly smaller emoji */
             margin-bottom: 1.5em;
-            /* Reduced vertical spacing */
-            /* animation: discoSpin 4s linear infinite; */
             display: inline-block;
         }
 
@@ -103,97 +87,33 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            /* vertical center */
             align-items: center;
-            /* horizontal center */
             min-height: 100vh;
-            /* required for vertical centering */
             padding: 0 0.5rem;
-            /* side margins for breathing room */
             text-align: center;
-        }
-
-
-        @keyframes discoSpin {
-            0% {
-                transform: rotate(0deg) scale(1);
-            }
-
-            50% {
-                transform: rotate(180deg) scale(1.2);
-            }
-
-            100% {
-                transform: rotate(360deg) scale(1);
-            }
-        }
-
-
-        .btn-container {
-            text-align: center;
-            /* center all inline-block buttons */
         }
 
         .btn {
             display: block;
             width: 100%;
-            /* width: fit-content; */
-            /* display: inline-block; */
             max-width: 280px;
-            /* background: rgba(255, 255, 255, 0.85); */
-            color: black;
-            text-decoration: none;
             padding: 5px;
             margin: 8px auto;
-            /* Slightly less vertical margin */
             border-radius: 12px;
             font-size: 0.8rem;
-            /* Reduced font size */
-            /* font-weight: bold; */
             font-family: "Space Mono", monospace;
-            /* transition: background 0.2s ease, transform 0.1s ease; */
-
-            color: white;
+            color: rgb(57, 14, 74);
             background: transparent;
-            border: 2px solid white;
+            border: 1px solid rgb(57, 14, 74);
             text-decoration: none;
             transition: transform 0.2s ease, box-shadow 0.3s ease;
             animation: pulseBorder 2.5s ease-in-out infinite;
-
         }
 
-        /* Optional: animated border “pulse” */
-        @keyframes pulseBorder {
-            0% {
-                box-shadow: 0 0 8px 1px white;
-            }
-
-            50% {
-                box-shadow: 0 0 16px 2px white;
-            }
-
-            100% {
-                box-shadow: 0 0 8px 1px white;
-            }
-        }
-
-        .footer-link {
-            margin-top: 10px;
-            font-size: 0.75rem;
-            }
-            .footer-link a {
-  color: #ffdccb; /* light accent color */
-  text-decoration: underline;
-}
-
-        /* Hover effect */
         .btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 8px 2px white;
-            /* glow around the outline */
         }
 
-        /* Page transitions */
         .page {
             display: none;
             opacity: 0;
@@ -215,25 +135,26 @@
             <h1>singling & mingling</h1>
             <div class="emoji">💐</div>
 
-            <div class="btn-container">
-                <a href="#" class="btn" onclick="showPage('social')">who's who?</a>
-                <a href="#" class="btn" onclick="showPage('activities')">turn the heat up</a>
-                <a href="#" class="btn" onclick="showPage('bars')">leaving so soon?</a>
-            </div>
+            <a href="#" class="btn" onclick="showPage('social')">who's who?</a>
+            <a href="#" class="btn" onclick="showPage('activities')">turn the heat up</a>
+            <a href="#" class="btn" onclick="showPage('bars')">leaving so soon?</a>
         </div>
 
         <!-- Feeling Social Page -->
         <div class="page" id="social">
         </br></br></br>
+            <a href="#" onclick="showPage('home')">back</a><br><br>
+
             <h1>find your people</h1>
             <p>The real reward is human connection. Keep track of your new friends' fun facts.</p>
             <div id="scavenger-hunt"></div>
             <br>
-            <a href="#" class="btn" onclick="showPage('home')">back</a>
         </div>
 
         <!-- Activities Page -->
         <div class="page" id="activities">
+            <a href="#" onclick="showPage('home')">back</a><br><br>
+
             <h1>what's there to do around here?</h1>
             <p>
                 🎲 <i>TAKE A CHANCE</i><br>
@@ -255,11 +176,12 @@
                 Find the candlelit picnic blankets by the back desk or in Sav’s hallway. 
             </p>
             <br>
-            <a href="#" class="btn" onclick="showPage('home')">back</a>
         </div>
 
         <!-- Bars Page -->
         <div class="page" id="bars">
+            <a href="#" onclick="showPage('home')">back</a><br><br>
+
             <h1>keep the night going</h1>
 
             <p>
@@ -271,56 +193,68 @@
                 <a href="https://maps.app.goo.gl/pnaTht2WuNyQ7CVi7">[map]</a>
             </p>
             <p>Or just bundle up and walk to the West Side Highway. It's free.</p>
-            <a href="#" class="btn" onclick="showPage('home')">back</a>
             <br>
         </div>
+        
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
         <script>
-            const clues = [
-                "I was a top 50 ranked competitive Pokémon player for a day during the pandemic 😤",
-                "I got a tick bite near my groin in Uganda",
-                "I like hitchhiking sometimes — I’ve caught rides in the US, New Zealand, and Japan",
-                "Visited Boston twice in the past month",
-                "Grew up in Shanghai",
-                "I made an escape room in my apartment last year where I dressed up as a panda",
-                "I have never used ChatGPT",
-                "I love creating weird food combinations ☺️",
-                "I have played tennis since I was 5 and just picked up snowboarding this winter!",
-                "Love to write!",
-                "My favorite restaurant is an Indian restaurant in Ningbo, China",
-                "I have a very smart cat who knows a bunch of tricks",
-                "I spent a week living in a dome in the middle of nowhere this January",
-                "I’ve done a polar plunge in Antarctica 🐧",
-                "I'm allergic to carrot juice!!",
-                "I went to high school with a basketball player",
-                "I can juggle",
-                "I enjoy learning languages",
-                "I lived in Switzerland for four years",
-                "I was kicked by a horse and survived",
+            // Single source of truth: clue + answer together
+            const scavengerItems = [
+            { clue: "I was a top 50 ranked competitive pokemon player for a day during the pandemic 😤", answer: "Aaron" },
+            { clue: "I got a tick bite near my groin in Uganda", answer: "Alex" },
+            { clue: "I like hitchhiking sometimes — i’ve caught rides in the US, New Zealand and Japan", answer: "Ben" },
+            { clue: "Visited Boston twice in the past month", answer: "Cathy" },
+            { clue: "Grew up in Shanghai", answer: "Daniel" },
+            { clue: "i made an escape room in my apt last year where i dressed up as a panda", answer: "dennis" },
+            { clue: "I have never used chatgpt", answer: "Diana" },
+            { clue: "I love creating weird food combinations ☺️", answer: "Edar" },
+            { clue: "I have played tennis since I was 5 and just picked up snowboarding this winter!", answer: "Emily" },
+            { clue: "Love to write!", answer: "Eseiwi" },
+            { clue: "My favorite restaurant is an Indian restaurant in ningbo China", answer: "Kevin" },
+            { clue: "i have a very smart cat who knows a bunch of tricks", answer: "madeleine" },
+            { clue: "I spent a week living in a dome in the middle of nowhere this January", answer: "Michael" },
+            { clue: "(I am the friend).", answer: "Queens" },
+            { clue: "I’ve done a polar plunge in Antarctica🐧", answer: "Ray" },
+            { clue: "I'm allergic to carrot juice!!", answer: "sambhav" },
+            { clue: "I went to highschool with a basketball player", answer: "Shen" },
+            { clue: "I can juggle", answer: "Taylor" },
+            { clue: "i enjoy learning languages", answer: "Tim" },
+            { clue: "i was kicked by a horse and survived", answer: "Yazan" }
             ];
 
-            // Load saved progress
-            const savedData = JSON.parse(localStorage.getItem('scavengerHuntNames')) || {};
 
+            // 🔔 IMPORTANT: Fill in each "answer" value above with the correct name.
+
+            const savedData = JSON.parse(localStorage.getItem('scavengerHuntNames')) || {};
             const container = document.getElementById('scavenger-hunt');
 
-            clues.forEach((clue, index) => {
+            scavengerItems.forEach((item, index) => {
                 const row = document.createElement('div');
                 row.className = 'clue-row';
 
                 const nameValue = savedData[index] || '';
 
                 row.innerHTML = `
-                <input type="text" placeholder="Name" class="name-input" value="${nameValue}">
-                <span class="clue-text">${clue}</span>
-              `;
+                    <input type="text" placeholder="Name" class="name-input" value="${nameValue}">
+                    <span class="clue-text">${item.clue}</span>
+                `;
 
                 container.appendChild(row);
 
-                // Save progress when typing
                 const nameInput = row.querySelector('.name-input');
-                nameInput.addEventListener('input', () => {
+
+                nameInput.addEventListener('input', (e) => {
+                    const userAnswer = e.target.value.trim().toLowerCase();
+                    const correctAnswer = item.answer.trim().toLowerCase();
+
                     saveProgress();
+
+                    if (correctAnswer && userAnswer === correctAnswer) {
+                        triggerConfetti();
+                        e.target.style.backgroundColor = "#c8ffdf";
+                        e.target.disabled = true;
+                    }
                 });
             });
 
@@ -331,8 +265,16 @@
                 });
                 localStorage.setItem('scavengerHuntNames', JSON.stringify(data));
             }
-        </script>
 
+            function triggerConfetti() {
+                confetti({
+                    particleCount: 120,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+
+        </script>
 
         <script>
             function showPage(pageId) {
@@ -342,6 +284,7 @@
                 document.getElementById(pageId).classList.add('active');
             }
         </script>
+
     </div>
 </body>
 
