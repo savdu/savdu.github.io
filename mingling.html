@@ -48,6 +48,7 @@
 
         .name-input {
             width: 70px;
+            font-family: "Space Mono", monospace;
             margin-right: 10px;
             padding: 4px 6px;
             border: 1px solid rgb(57, 14, 74);;
@@ -204,32 +205,57 @@
         <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
         <script>
-            // Single source of truth: clue + answer together
+
             const scavengerItems = [
-            { clue: "I was a top 50 ranked competitive pokemon player for a day during the pandemic 😤", answer: "Aaron" },
-            { clue: "I got a tick bite near my groin in Uganda", answer: "Alex" },
-            { clue: "I like hitchhiking sometimes — i’ve caught rides in the US, New Zealand and Japan", answer: "Ben" },
-            { clue: "Visited Boston twice in the past month", answer: "Cathy" },
-            { clue: "Grew up in Shanghai", answer: "Daniel" },
-            { clue: "i made an escape room in my apt last year where i dressed up as a panda", answer: "dennis" },
-            { clue: "I have never used chatgpt", answer: "Diana" },
-            { clue: "I love creating weird food combinations ☺️", answer: "Edar" },
-            { clue: "I have played tennis since I was 5 and just picked up snowboarding this winter!", answer: "Emily" },
-            { clue: "Love to write!", answer: "Eseiwi" },
-            { clue: "My favorite restaurant is an Indian restaurant in ningbo China", answer: "Kevin" },
-            { clue: "i have a very smart cat who knows a bunch of tricks", answer: "madeleine" },
-            { clue: "I spent a week living in a dome in the middle of nowhere this January", answer: "Michael" },
-            { clue: "(I am the friend).", answer: "Queens" },
-            { clue: "I’ve done a polar plunge in Antarctica🐧", answer: "Ray" },
-            { clue: "I'm allergic to carrot juice!!", answer: "sambhav" },
-            { clue: "I went to highschool with a basketball player", answer: "Shen" },
-            { clue: "I can juggle", answer: "Taylor" },
-            { clue: "i enjoy learning languages", answer: "Tim" },
-            { clue: "i was kicked by a horse and survived", answer: "Yazan" }
+                { clue: "I sung at Obama’s inauguration", answer: "Wangene" },
+                { clue: "I like hitchhiking sometimes — i’ve caught rides in the US, New Zealand and Japan", answer: "Ben" },
+                { clue: "I have been to 1,100+ restaurants/bars in NYC", answer: "Queens" },
+                { clue: "I broke my back at an american ninja warrior gym", answer: "Alex" },
+                { clue: "I love soup!", answer: "Kristy" },
+                { clue: "I have been to all 7 continents", answer: "Keli" },
+                { clue: "I spent a week living in a dome in the middle of nowhere this January", answer: "Michael" },
+                { clue: "i’ve been hit by a car while sitting at a cafe", answer: "ashley" },
+                { clue: "I make lattes and I run a tonnnnn", answer: "Jonathan" },
+                { clue: "I got a tick bite near my groin in Uganda", answer: "Alex" },
+                { clue: "i wrote a top 5 by popularity percy jackson fanfic in midde school", answer: "kvn" },
+                { clue: "I can make the perry the platypus clicking sound", answer: "Karina" },
+                { clue: "I was featured on NYMag last week", answer: "Josh" },
+                { clue: "I met dua lipa", answer: "Mahir" },
+                { clue: "I went to highschool with a basketball player", answer: "Shen" },
+                { clue: "I was a top 50 ranked competitive pokemon player for a day during the pandemic 😤", answer: "Aaron" },
+                { clue: "I’ve done a polar plunge in Antarctica🐧", answer: "Ray" },
+                { clue: "i made an escape room in my apt last year where i dressed up as a panda", answer: "dennis" },
+                { clue: "I love creating weird food combinations ☺️", answer: "Edar" },
+                { clue: "Almost a sub-4 miler", answer: "George" },
+                { clue: "I can juggle", answer: "Taylor" },
+                { clue: "i can teach you to dig for clams", answer: "Isabelle" },
+                { clue: "Getting an MFA!", answer: "Chelsea" },
+                { clue: "i have an identical twin", answer: "annie" },
+                { clue: "Visited Boston twice in the past month", answer: "Cathy" },
+                { clue: "I write with my right hand but draw with my left", answer: "Alli" },
+                { clue: "the app i created secretly got acquired by Google 🤫", answer: "Leon" },
+                { clue: "i hiked the grand canyon in 1 day last year!", answer: "darren" },
+                { clue: "I have a lucky blue mole! It’s actually blue!", answer: "Marie" },
+                { clue: "I have never used chatgpt", answer: "Diana" },
+                { clue: "I climbed Mt. Fuji!", answer: "Anu" },
+                { clue: "I have played tennis since I was 5 and just picked up snowboarding this winter!", answer: "Emily" },
+                { clue: "Born and raised in Siberia", answer: "Tanya" },
+                { clue: "in a band with someone in this room", answer: "Sav" },
+                { clue: "Last week I taught someone how to float after her negligent bf dumped her in my swim lane and told her to figure it out and then walked away", answer: "Evan" },
+                { clue: "i enjoy assembling ikea furniture & lemon tarts !", answer: "ang" },
+                { clue: "My favorite restaurant is an Indian restaurant in ningbo China", answer: "Kevin" },
+                { clue: "i have a very smart cat who knows a bunch of tricks", answer: "madeleine" },
+                { clue: "I used to be a sychronized swimmer", answer: "Christina" },
+                { clue: "I’m a fourth degree black belt in Taekwondo.", answer: "Kavya" },
+                { clue: "i biked a stage of the tour de france last year", answer: "Nicole" },
+                { clue: "I’ve been to the NYC Din Tai Fung 10 times", answer: "Kelsey" },
+                { clue: "Love to write!", answer: "Eseiwi" },
+                { clue: "hate drinking water", answer: "sharie" },
+                { clue: "I lived with Lil Yachty for a week", answer: "Matt" },
+                { clue: "I went to Thailand last month just to play badminton.", answer: "mindy" },
+                { clue: "I'm allergic to carrot juice!!", answer: "sambhav" },
+                { clue: "i was kicked by a horse and survived", answer: "Yazan" }
             ];
-
-
-            // 🔔 IMPORTANT: Fill in each "answer" value above with the correct name.
 
             const savedData = JSON.parse(localStorage.getItem('scavengerHuntNames')) || {};
             const container = document.getElementById('scavenger-hunt');
