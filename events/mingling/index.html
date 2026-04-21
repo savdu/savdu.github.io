@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>singling & mingling</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../style.css">
+
+    <!-- ============================================================
+         EVENT CONFIG — edit this section for each new event
+         ============================================================ -->
+    <style>
+        :root {
+            --gradient: linear-gradient(135deg, #eabbff, #ffb5ea, #ffbfbf);
+            --text: rgb(57, 14, 74);
+            --border: rgb(57, 14, 74);
+            --placeholder: rgb(59, 46, 64);
+            --font-body: "Space Mono", monospace;
+            --font-heading: "Silkscreen", sans-serif;
+        }
+
+        .btn { border-width: 1px; }
+    </style>
+    <!-- ============================================================
+         END EVENT CONFIG
+         ============================================================ -->
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- Home -->
+        <div class="page active" id="home">
+            <h1>singling & mingling</h1>
+            <div class="emoji">💐</div>
+            <a href="#" class="btn" onclick="showPage('social')">who's who?</a>
+            <a href="#" class="btn" onclick="showPage('activities')">turn the heat up</a>
+            <a href="#" class="btn" onclick="showPage('bars')">leaving so soon?</a>
+        </div>
+
+        <!-- Social / Scavenger Hunt -->
+        <div class="page" id="social">
+            <br><br><br>
+            <a href="#" onclick="showPage('home')">back</a><br><br>
+            <h1>find your people</h1>
+            <p>The real reward is human connection. Keep track of your new friends' fun facts.</p>
+            <div id="scavenger-hunt"></div>
+            <br>
+        </div>
+
+        <!-- Activities -->
+        <div class="page" id="activities">
+            <a href="#" onclick="showPage('home')">back</a><br><br>
+            <h1>what's there to do around here?</h1>
+            <p>
+                🎲 <i>TAKE A CHANCE</i><br>
+                Grab a chance card from the kitchen stack. (Look out! The hosts might serve you one at any moment.)
+            </p>
+            <p>
+                🍷 <i>FEELING PARCHED?</i><br>
+                Head to the kitchen and grab a drink for yourself and someone new.
+            </p>
+            <p>
+                ☺️ <i>FEELING SHY?</i><br>
+                Find a host for assisted introductions.
+            </p>
+            <p>
+                👀 <i>FEELING CREATIVE?</i><br>
+                Test each others' artistic abilities with the art supplies on the kitchen table. Set a 5 minute timer and draw each other. Take this chance to look deep into each others' eyes.
+            </p>
+            <p>
+                ❤️ <i>FEELING A CONNECTION?</i><br>
+                Find the candlelit picnic blankets by the back desk or in Sav's hallway.
+            </p>
+            <p>
+                📞 <i>FEELING RISKY?</i><br>
+                Grab a name & number from the hats near the entryway to set up a blind date.
+            </p>
+            <br>
+        </div>
+
+        <!-- Bars -->
+        <div class="page" id="bars">
+            <a href="#" onclick="showPage('home')">back</a><br><br>
+            <h1>keep the night going</h1>
+            <p>
+                <b>Crown Alley</b>: cozy & friendly, fun cocktails. 7 min walk. Closes 2am.
+                <a href="https://maps.app.goo.gl/CK56J2RWLR5Mm6dV8">[map]</a>
+            </p>
+            <p>
+                <b>Bar 21</b>: cooky cafe to bar. 5 min walk. Closes 11pm.
+                <a href="https://maps.app.goo.gl/pnaTht2WuNyQ7CVi7">[map]</a>
+            </p>
+            <p>Or just bundle up and walk to the West Side Highway. It's free.</p>
+            <br>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="../../js/scavenger.js"></script>
+    <script src="../../js/load-csv.js"></script>
+    <script src="data.js"></script>
+</body>
+</html>

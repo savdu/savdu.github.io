@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>19th night of september</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../style.css">
+
+    <!-- ============================================================
+         EVENT CONFIG — edit this section for each new event
+         ============================================================ -->
+    <style>
+        :root {
+            --gradient: linear-gradient(135deg, #914cff, #ff5331, #fdbb2d);
+            --text: white;
+            --border: white;
+            --placeholder: #ffdccb;
+            --font-body: "Space Mono", monospace;
+            --font-heading: "Silkscreen", sans-serif;
+        }
+
+        .emoji { animation: discoSpin 4s linear infinite; }
+
+        @keyframes discoSpin {
+            0%   { transform: rotate(0deg) scale(1); }
+            50%  { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        @keyframes pulseBorder {
+            0%   { box-shadow: 0 0 8px 1px white; }
+            50%  { box-shadow: 0 0 16px 2px white; }
+            100% { box-shadow: 0 0 8px 1px white; }
+        }
+
+        .btn {
+            border-width: 2px;
+            animation: pulseBorder 2.5s ease-in-out infinite;
+        }
+    </style>
+    <!-- ============================================================
+         END EVENT CONFIG
+         ============================================================ -->
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- Home -->
+        <div class="page active" id="home">
+            <h1>do you remember the 19th night of september?</h1>
+            <div class="emoji">🪩</div>
+            <div class="btn-container">
+                <a href="#" class="btn" onclick="showPage('menu')">menu</a>
+                <a href="#" class="btn" onclick="showPage('vote')">feeling judgy?</a>
+                <a href="#" class="btn" onclick="showPage('social')">feeling social?</a>
+                <a href="#" class="btn" onclick="showPage('shy')">feeling shy?</a>
+                <a href="#" class="btn" onclick="showPage('beautiful')">feeling beautiful?</a>
+                <a href="#" class="btn" onclick="showPage('breather')">feeling like you want to take a break from the party and yap with michael in his room?</a>
+            </div>
+            <div class="footer-link">
+                <a href="https://www.ticketweb.com/event/corner-club-azkal-the-bowery-electric-tickets/14506303" target="_blank">
+                    see corner club & AZKAL on oct 11
+                </a>
+            </div>
+        </div>
+
+        <!-- Menu -->
+        <div class="page" id="menu">
+            <h1>drinks on us</h1>
+            <p><i>Curated by bartender Kristy.</i></p></br>
+            <p><b>Colors of the Wind Sangria</b></p>
+            <p>White wine, fruit, sparkling water</p>
+            <p><b>Fireball Sunrise</b></p>
+            <p>Fireball, orange juice, grenadine</p>
+            <p><b>Forest Floor Fizz</b></p>
+            <p>Gin, cucumber juice, elderflower liqueur, lemon juice, honey, tonic water</p>
+            <br>
+            <a href="#" class="btn" onclick="showPage('home')">back</a>
+        </div>
+
+        <!-- Vote -->
+        <div class="page" id="vote">
+            <h1>vote for best dressed</h1>
+            <p>Grab a sticker from the entryway table in front of the trophy. Bestow it upon the best dressed. If you change your mind, dramatically take it back and re-bestow it.</p>
+            <p>Final tallies will be counted at 11pm.</p>
+            <br>
+            <a href="#" class="btn" onclick="showPage('home')">back</a>
+        </div>
+
+        <!-- Social / Scavenger Hunt -->
+        <div class="page" id="social">
+            <br><br><br>
+            <h1>find your people</h1>
+            <p>The real reward is human connection. Keep track of your new friends' fun facts.</p>
+            <div id="scavenger-hunt"></div>
+            <br>
+            <a href="#" class="btn" onclick="showPage('home')">back</a>
+        </div>
+
+        <!-- Shy -->
+        <div class="page" id="shy">
+            <h1>assisted introductions</h1>
+            <p>Seek out Sav (the disco ball) to be introduced to a new friend, flirt, or foe.</p>
+            <p>Use the phrase, "Sav, I'm feeling shy."</p>
+            <br>
+            <a href="#" class="btn" onclick="showPage('home')">back</a>
+        </div>
+
+        <!-- Beautiful -->
+        <div class="page" id="beautiful">
+            <h1>yes you are</h1>
+            <p>Ponder the question: <i>when did you first realize you were beautiful?</i></p>
+            <p>Write your answer on a sticky note and add it to the poster across the bathroom.</p>
+            <p>Perhaps you will find yourself in a future song ;)</p>
+            <br>
+            <a href="#" class="btn" onclick="showPage('home')">back</a>
+        </div>
+
+        <!-- Breather -->
+        <div class="page" id="breather">
+            <h1>take a breather</h1>
+            <p>Look for the man wearing disco pants. Use the phrase, "Michael, I need a breather."</p>
+            <p>If he can't be found, knock on his door and enter his room.</p>
+            <p><i>(Max capacity: 3)</i></p>
+            <br>
+            <a href="#" class="btn" onclick="showPage('home')">back</a>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="../../js/scavenger.js"></script>
+    <script src="../../js/load-csv.js"></script>
+    <script src="data.js"></script>
+</body>
+</html>
