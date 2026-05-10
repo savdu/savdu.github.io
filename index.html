@@ -4,11 +4,66 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>sav's stuff</title>
+    <link rel="stylesheet" href="site.css">
     <style>
-        body { font-family: 'Monaco', monospace; font-size: small;}
+        button { 
+            font-family: 'Menlo', monospace; 
+            font-size: small; 
+            cursor: pointer; 
+            background-color: white;
+            border-width: 1px 1px 1px 1px;
+            border-radius: 2px;
+        }
+        .ck { cursor: pointer; user-select: none; }
+
+        .textedit-win {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 300px;
+            background: white;
+            border: 1px solid #b0b0b0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.22);
+            overflow: hidden;
+            z-index: 1000;
+            font-family: 'Menlo', monospace;
+            font-size: small;
+        }
+
+        .textedit-bar {
+            background: white;
+            padding: 7px 10px;
+            display: flex;
+            align-items: center;
+            cursor: grab;
+            border-bottom: 1px solid #b8b8b8;
+            user-select: none;
+        }
+
+        .textedit-bar:active { cursor: grabbing; }
+
+        .traffic-lights { display: flex; gap: 6px; flex-shrink: 0; }
+
+        .tl { width: 12px; height: 12px; border-radius: 50%; cursor: default; }
+        .tl-red { background: #ff5f57; border: 0.5px solid #df3b36; }
+        .tl-red:hover { background: #ff3b30; cursor: pointer; }
+
+        .textedit-title {
+            flex: 1;
+            text-align: left;
+            font-size: 12px;
+            /* color: #3c3c3c; */
+            margin-right: 36px;
+            margin-left: 10px;
+            font-family: 'Menlo', monospace;
+        }
+
+        .textedit-body { padding: 14px 16px; }
     </style>
 </head>
 <body>
+<div class="container">
 
     <p>i'm sav and this is my stuff :)</p>
 
@@ -29,9 +84,8 @@
     
     <p>[3] other<br>
     <a href="https://hyphenate.cafe">hyphenate</a><br>
-    <!-- <a href="other/qtna.html">qtna</a><br> -->
+    <a href="other/thoughts.html">thoughts</a><br>
     <a href="friends/index.html">things other people made</a><br>
-    <a href="other/ok.html">r u ok?</a>
     <!-- <a href="other/art.html">art forms i've tried</a> [pottery, painting, cricut, roving-weaving] <br> -->
     </p>
 
@@ -43,5 +97,103 @@
     - 2400 sat
     </p>
 
+</div>
+
+<div class="textedit-win" id="textedit-win">
+    <div class="textedit-bar" id="textedit-bar">
+        <div class="traffic-lights">
+            <div class="tl tl-red" id="tl-red"></div>
+        </div>
+        <div class="textedit-title">are-you-ok.txt</div>
+    </div>
+    <div class="textedit-body">
+        <span class="ck" onclick="toggle(this)">[ ]</span> have you eaten?<br>
+        <span class="ck" onclick="toggle(this)">[ ]</span> have you drank water?<br>
+        <span class="ck" onclick="toggle(this)">[ ]</span> have you slept?<br>
+        <span class="ck" onclick="toggle(this)">[ ]</span> have you seen the sun?<br>
+        <span class="ck" onclick="toggle(this)">[ ]</span> have you had screen off time?<br>
+        <span class="ck" onclick="toggle(this)">[ ]</span> have you left the house?<br>
+        <br>
+        <button onclick="handleSubmit()">beep boop calcumalate</button>
+        <p id="ok-result"></p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script>
+    function toggle(el) {
+        el.classList.toggle('checked');
+        el.textContent = el.classList.contains('checked') ? '[x]' : '[ ]';
+    }
+
+    function handleSubmit() {
+        const count = document.querySelectorAll('.ck.checked').length;
+        const messages = {
+            0: "you are not ok. seek help.",
+            1: "you are not ok. seek help.",
+            2: "how about doing more than the bare minimum?",
+            3: "how about doing more than the bare minimum?",
+            4: "you are almost ok.",
+            5: "you are almost ok.",
+            6: "congratulations. you are ok."
+        };
+        if (count === 6) {
+            confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+        }
+        document.getElementById('ok-result').textContent = messages[count];
+    }
+
+    const win = document.getElementById('textedit-win');
+    const bar = document.getElementById('textedit-bar');
+    let dragging = false, ox, oy;
+
+    bar.addEventListener('mousedown', e => {
+        if (e.target.id === 'tl-red') return;
+        dragging = true;
+        const rect = win.getBoundingClientRect();
+        win.style.top = rect.top + 'px';
+        win.style.left = rect.left + 'px';
+        win.style.bottom = 'auto';
+        win.style.right = 'auto';
+        ox = e.clientX - rect.left;
+        oy = e.clientY - rect.top;
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', e => {
+        if (!dragging) return;
+        win.style.left = (e.clientX - ox) + 'px';
+        win.style.top = (e.clientY - oy) + 'px';
+    });
+
+    document.addEventListener('mouseup', () => { dragging = false; });
+
+    bar.addEventListener('touchstart', e => {
+        if (e.target.id === 'tl-red') return;
+        const t = e.touches[0];
+        dragging = true;
+        const rect = win.getBoundingClientRect();
+        win.style.top = rect.top + 'px';
+        win.style.left = rect.left + 'px';
+        win.style.bottom = 'auto';
+        win.style.right = 'auto';
+        ox = t.clientX - rect.left;
+        oy = t.clientY - rect.top;
+    }, { passive: true });
+
+    document.addEventListener('touchmove', e => {
+        if (!dragging) return;
+        e.preventDefault();
+        const t = e.touches[0];
+        win.style.left = (t.clientX - ox) + 'px';
+        win.style.top = (t.clientY - oy) + 'px';
+    }, { passive: false });
+
+    document.addEventListener('touchend', () => { dragging = false; });
+
+    document.getElementById('tl-red').addEventListener('click', () => {
+        win.style.display = 'none';
+    });
+</script>
 </body>
 </html>

@@ -1,26 +1,42 @@
 # savs-stuff — project context
 
 ## what this is
-A collection of party event pages hosted (eventually) on savannahdu.com. Each event has a mini single-page app with a scavenger hunt, activities, and other party info. There's an archive index linking to all events.
+A personal website and non-conventional portfolio. `index.html` is the top-level hub linking to several categories of content: personal writing, hosted events, and other interesting links. The aesthetic is intentionally minimal and informal — monospaced font, no framework, plain HTML.
 
 ## current file structure
 
 ```
 savs-stuff/
-  index.html              ← bare archive list of all events
-  style.css               ← all shared CSS (uses CSS variables for theming)
+  index.html              ← top-level hub: links to writing, events, other, friends
+  style.css               ← event-only CSS (uses CSS variables for theming; do not use for simple pages)
+  site.css                ← shared CSS for simple pages (body font, .container)
   CONTEXT.md              ← this file
   js/
     scavenger.js          ← shared scavenger hunt logic: initScavenger(), showPage()
     load-csv.js           ← CSV fetcher/parser: loadCSV() — for Partiful-based events
+  writing/
+    ezra.html             ← "the ezra song" (2023-10-30) — personal essay
+    sf.html               ← "when i think about san francisco" (2025-04-10) — personal essay
+    miami.html            ← "10 hours at the miami airport" (2025-12-30) — personal essay
   events/
     september/
-      index.html          ← "19th night of september" (2025-09-19)
+      index.html          ← "19th night of september" (2025-09-19) — party mini-app
       data.js             ← hand-curated clues (no answers), calls initScavenger()
     mingling/
-      index.html          ← "singling & mingling" (2026-02-20)
+      index.html          ← "singling & mingling" (2026-02-20) — party mini-app
       data.js             ← clues + answers from Partiful, calls initScavenger()
+  other/
+    thoughts.html         ← scratchpad / questions page
+    ok.html               ← wellness checklist ("r u ok?")
+  friends/
+    index.html            ← links to things other people made
 ```
+
+## two distinct subsystems
+
+**Simple pages** (`index.html`, `writing/`, `other/`, `friends/`) share `site.css` and use a plain `.container` div for centered, left-aligned content. Keep these minimal.
+
+**Event pages** (`events/`) are independent mini single-page apps with their own theming via `style.css` and CSS variables. They have animated gradients, custom fonts, scavenger hunts, etc. Treat them as a separate concern.
 
 ## how a new event works
 
