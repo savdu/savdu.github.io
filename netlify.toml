@@ -1,0 +1,7 @@
+[functions]
+  directory = "netlify/functions"
+
+[[redirects]]
+  from = "/api/thoughts"
+  to = "/.netlify/functions/notion-thoughts"
+  status = 200
