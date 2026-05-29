@@ -3,5 +3,5 @@
 
 [[redirects]]
   from = "/api/thoughts"
-  to = "/.netlify/functions/notion-thoughts"
+  to = "/.netlify/functions/thoughts"
   status = 200
