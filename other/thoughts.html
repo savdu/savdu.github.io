@@ -190,7 +190,7 @@
 
             const positions = scatter(data.length);
             data.forEach(({ title, content }, i) => {
-                createWindow(title, content, positions[i][0], positions[i][1]);
+                createWindow(`${title}.txt`, content, positions[i][0], positions[i][1]);
             });
         } catch (err) {
             status.textContent = '[could not load notes]';
