@@ -55,7 +55,6 @@
             padding: 14px 16px;
             min-height: 50px;
             overflow-y: auto;
-            white-space: pre-wrap;
             word-break: break-word;
             font-size: 11px;
             line-height: normal;
@@ -165,7 +164,11 @@
 
         const body = document.createElement('div');
         body.className = 'textedit-body';
-        body.textContent = content;
+        body.innerHTML = content
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\n/g, '<br>');
 
         win.appendChild(bar);
         win.appendChild(body);
@@ -201,11 +204,12 @@
 
     // ── Random scatter placement ──────────────────────────────────────
     function scatter(count) {
-        const WIN_W = 316, WIN_H = 180;
+        const WIN_W = 320, WIN_H = 200;
+        const vw = window.innerWidth, vh = window.innerHeight;
         const positions = [];
         for (let i = 0; i < count; i++) {
-            const x = 16 + Math.random() * Math.max(0, window.innerWidth  - WIN_W - 16);
-            const y = 80 + Math.random() * Math.max(0, window.innerHeight - WIN_H - 16);
+            const x = 16 + Math.random() * Math.max(0, vw - WIN_W - 16);
+            const y = 80 + Math.random() * Math.max(0, vh - WIN_H - 80 - 16);
             positions.push([x, y]);
         }
         return positions;
