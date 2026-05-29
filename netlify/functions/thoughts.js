@@ -2,24 +2,21 @@ const SHEET_ID = '1m3v5zNMl5Wi-lI881nvuAEoT-kt9rXPEh2DihJcIJRg';
 const TSV_URL  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=tsv&gid=0`;
 
 function parseTSV(text) {
-  const result = [];
-  let row = [], field = '', inQuotes = false;
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i], next = text[i + 1];
-    if (inQuotes) {
-      if (ch === '"' && next === '"') { field += '"'; i++; }
-      else if (ch === '"') { inQuotes = false; }
-      else { field += ch; }
-    } else {
-      if (ch === '"')  { inQuotes = true; }
-      else if (ch === '\t')  { row.push(field); field = ''; }
-      else if (ch === '\r')  { /* skip */ }
-      else if (ch === '\n')  { row.push(field); result.push(row); row = []; field = ''; }
-      else { field += ch; }
+  const notes = [];
+  let current = null;
+
+  for (const line of text.replace(/\r/g, '').split('\n').slice(1)) {
+    const tabIdx = line.indexOf('\t');
+    if (tabIdx !== -1) {
+      if (current?.title) notes.push(current);
+      current = { title: line.slice(0, tabIdx).trim(), content: line.slice(tabIdx + 1) };
+    } else if (current) {
+      current.content += '\n' + line;
     }
   }
-  if (field.length || row.length) { row.push(field); result.push(row); }
-  return result;
+  if (current?.title) notes.push(current);
+  notes.forEach(n => { n.content = n.content.trim(); });
+  return notes;
 }
 
 export default async () => {
@@ -27,12 +24,7 @@ export default async () => {
     const res = await fetch(TSV_URL);
     if (!res.ok) throw new Error(`Sheet fetch failed: ${res.status}`);
 
-    const text  = await res.text();
-    const rows  = parseTSV(text).slice(1); // skip header row
-    const notes = rows
-      .filter(cols => cols[0]?.trim())
-      .map(cols => ({ title: cols[0].trim(), content: (cols[1] ?? '').trim() }));
-
+    const notes = parseTSV(await res.text());
     return new Response(JSON.stringify(notes), {
       headers: { 'Content-Type': 'application/json' }
     });
