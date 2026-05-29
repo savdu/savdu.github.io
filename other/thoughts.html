@@ -5,14 +5,199 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>sav's thoughts</title>
     <link rel="stylesheet" href="../site.css">
+    <style>
+        .textedit-win {
+            position: fixed;
+            width: 300px;
+            background: white;
+            border: 1px solid #b0b0b0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.22);
+            overflow: hidden;
+            z-index: 1000;
+            font-family: 'Menlo', monospace;
+            font-size: small;
+        }
+
+        .textedit-bar {
+            background: white;
+            padding: 7px 10px;
+            display: flex;
+            align-items: center;
+            cursor: grab;
+            border-bottom: 1px solid #b8b8b8;
+            user-select: none;
+        }
+
+        .textedit-bar:active { cursor: grabbing; }
+
+        .traffic-lights { display: flex; gap: 6px; flex-shrink: 0; }
+
+        .tl { width: 12px; height: 12px; border-radius: 50%; cursor: default; }
+        .tl-red { background: #ff5f57; border: 0.5px solid #df3b36; }
+        .tl-red:hover { background: #ff3b30; cursor: pointer; }
+
+        .textedit-title {
+            flex: 1;
+            text-align: left;
+            font-size: 12px;
+            margin-right: 36px;
+            margin-left: 10px;
+            font-family: 'Menlo', monospace;
+        }
+
+        .textedit-body {
+            padding: 14px 16px;
+            max-height: 220px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.6;
+        }
+
+        #status {
+            font-family: 'Menlo', monospace;
+            font-size: small;
+            color: #888;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-
     <a href="/index.html">back</a><br><br>
-
-    <p>questions that need answering</p>
-
+    <p>a freeform collection of my latest thoughts via notion database</p>
+    <span id="status"></span>
 </div>
+
+<script>
+    const THOUGHTS_API = '/api/thoughts';
+
+    // ── Dragging ─────────────────────────────────────────────────────
+    let activeWin = null, ox, oy, zTop = 1000;
+
+    function makeDraggable(win, bar) {
+        bar.addEventListener('mousedown', e => {
+            if (e.target.classList.contains('tl-red')) return;
+            activeWin = win;
+            const rect = win.getBoundingClientRect();
+            win.style.top    = rect.top  + 'px';
+            win.style.left   = rect.left + 'px';
+            win.style.bottom = 'auto';
+            win.style.right  = 'auto';
+            ox = e.clientX - rect.left;
+            oy = e.clientY - rect.top;
+            win.style.zIndex = ++zTop;
+            e.preventDefault();
+        });
+
+        bar.addEventListener('touchstart', e => {
+            if (e.target.classList.contains('tl-red')) return;
+            const t = e.touches[0];
+            activeWin = win;
+            const rect = win.getBoundingClientRect();
+            win.style.top    = rect.top  + 'px';
+            win.style.left   = rect.left + 'px';
+            win.style.bottom = 'auto';
+            win.style.right  = 'auto';
+            ox = t.clientX - rect.left;
+            oy = t.clientY - rect.top;
+            win.style.zIndex = ++zTop;
+        }, { passive: true });
+    }
+
+    document.addEventListener('mousemove', e => {
+        if (!activeWin) return;
+        activeWin.style.left = (e.clientX - ox) + 'px';
+        activeWin.style.top  = (e.clientY - oy) + 'px';
+    });
+
+    document.addEventListener('mouseup', () => { activeWin = null; });
+
+    document.addEventListener('touchmove', e => {
+        if (!activeWin) return;
+        e.preventDefault();
+        const t = e.touches[0];
+        activeWin.style.left = (t.clientX - ox) + 'px';
+        activeWin.style.top  = (t.clientY - oy) + 'px';
+    }, { passive: false });
+
+    document.addEventListener('touchend', () => { activeWin = null; });
+
+    // ── Window creation ───────────────────────────────────────────────
+    function createWindow(title, content, x, y) {
+        const win = document.createElement('div');
+        win.className = 'textedit-win';
+        win.style.left   = x + 'px';
+        win.style.top    = y + 'px';
+        win.style.zIndex = ++zTop;
+
+        const bar = document.createElement('div');
+        bar.className = 'textedit-bar';
+
+        const lights = document.createElement('div');
+        lights.className = 'traffic-lights';
+        const red = document.createElement('div');
+        red.className = 'tl tl-red';
+        lights.appendChild(red);
+
+        const titleEl = document.createElement('div');
+        titleEl.className = 'textedit-title';
+        titleEl.textContent = title;
+
+        bar.appendChild(lights);
+        bar.appendChild(titleEl);
+
+        const body = document.createElement('div');
+        body.className = 'textedit-body';
+        body.textContent = content;
+
+        win.appendChild(bar);
+        win.appendChild(body);
+
+        red.addEventListener('click', () => { win.style.display = 'none'; });
+        document.body.appendChild(win);
+        makeDraggable(win, bar);
+    }
+
+    // ── Random scatter placement ──────────────────────────────────────
+    function scatter(count) {
+        const WIN_W = 316, WIN_H = 180;
+        const positions = [];
+        for (let i = 0; i < count; i++) {
+            const x = 16 + Math.random() * Math.max(0, window.innerWidth  - WIN_W - 16);
+            const y = 80 + Math.random() * Math.max(0, window.innerHeight - WIN_H - 16);
+            positions.push([x, y]);
+        }
+        return positions;
+    }
+
+    // ── Notion fetch ──────────────────────────────────────────────────
+    async function loadNotes() {
+        const status = document.getElementById('status');
+
+        status.textContent = 'loading...';
+
+        try {
+            const res = await fetch(THOUGHTS_API);
+
+            if (!res.ok) {
+                status.textContent = `[error ${res.status}]`;
+                return;
+            }
+
+            const data = await res.json();
+            status.textContent = '';
+
+            const positions = scatter(data.length);
+            data.forEach(({ title, content }, i) => {
+                createWindow(title, content, positions[i][0], positions[i][1]);
+            });
+        } catch (err) {
+            status.textContent = '[could not load notes]';
+        }
+    }
+
+    loadNotes();
+</script>
 </body>
 </html>
