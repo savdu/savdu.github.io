@@ -9,6 +9,10 @@
         .textedit-win {
             position: fixed;
             width: 300px;
+            min-width: 180px;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
             background: white;
             border: 1px solid #b0b0b0;
             border-radius: 8px;
@@ -47,13 +51,23 @@
         }
 
         .textedit-body {
+            flex: 1;
             padding: 14px 16px;
-            max-height: 220px;
+            min-height: 50px;
             overflow-y: auto;
             white-space: pre-wrap;
             word-break: break-word;
             font-size: 11px;
             line-height: normal;
+        }
+
+        .resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 16px;
+            height: 16px;
+            cursor: nwse-resize;
         }
 
         #status {
@@ -66,7 +80,7 @@
 <body>
 <div class="container">
     <a href="/index.html">back</a><br><br>
-    <p>a freeform collection of my latest thoughts via notion database</p>
+    <p>a freeform collection of my latest thoughts</p>
     <span id="status"></span>
 </div>
 
@@ -155,9 +169,33 @@
         win.appendChild(bar);
         win.appendChild(body);
 
+        const handle = document.createElement('div');
+        handle.className = 'resize-handle';
+
         red.addEventListener('click', () => { win.style.display = 'none'; });
+        win.appendChild(handle);
         document.body.appendChild(win);
         makeDraggable(win, bar);
+        makeResizable(win, handle);
+    }
+
+    function makeResizable(win, handle) {
+        handle.addEventListener('mousedown', e => {
+            e.stopPropagation();
+            const startX = e.clientX, startY = e.clientY;
+            const startW = win.offsetWidth, startH = win.offsetHeight;
+            const onMove = e => {
+                win.style.width  = Math.max(180, startW + e.clientX - startX) + 'px';
+                win.style.height = Math.max(80,  startH + e.clientY - startY) + 'px';
+            };
+            const onUp = () => {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+            };
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+            e.preventDefault();
+        });
     }
 
     // ── Random scatter placement ──────────────────────────────────────
