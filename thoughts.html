@@ -116,8 +116,9 @@
                 border-color: #999;
             }
 
-            /* list view: hide body, remove bar border when collapsed */
+            /* list view */
             #win-container.list-view .textedit-body { display: none; }
+            #win-container.list-view .textedit-win:not(.expanded) { min-height: 0; }
             #win-container.list-view .textedit-win:not(.expanded) .textedit-bar { border-bottom: none; }
             #win-container.list-view .textedit-win.expanded .textedit-body { display: block; }
         }
@@ -128,7 +129,10 @@
     <a href="/index.html">back</a><br><br>
     <p>a freeform collection of my latest thoughts</p>
     <div id="view-toggle">
-        <button class="view-btn active" id="btn-stack" onclick="setView('stack')" title="expanded view">
+        <button class="view-btn active" id="btn-scatter" onclick="setView('scatter')" title="scatter view">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="3" cy="4" r="1.5" fill="currentColor"/><circle cx="12" cy="3" r="1.5" fill="currentColor"/><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="13" cy="11" r="1.5" fill="currentColor"/><circle cx="8" cy="7" r="1.5" fill="currentColor"/></svg>
+        </button>
+        <button class="view-btn" id="btn-stack" onclick="setView('stack')" title="expanded view">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="6" rx="1" fill="currentColor"/><rect x="1" y="9" width="14" height="6" rx="1" fill="currentColor"/></svg>
         </button>
         <button class="view-btn" id="btn-list" onclick="setView('list')" title="list view">
@@ -141,17 +145,17 @@
 
 <script>
     const THOUGHTS_API = '/api/thoughts';
-    const isMobile = window.innerWidth < 600;
-    let mobileView = 'stack';
+    const isMobile     = window.innerWidth < 600;
+    let mobileView     = 'scatter';
+    let notesData      = [];
 
+    // ── View toggle (mobile only) ─────────────────────────────────────
     function setView(view) {
         mobileView = view;
-        document.getElementById('win-container').classList.toggle('list-view', view === 'list');
-        if (view === 'list') {
-            document.querySelectorAll('.textedit-win').forEach(w => w.classList.remove('expanded'));
-        }
-        document.getElementById('btn-stack').classList.toggle('active', view === 'stack');
-        document.getElementById('btn-list').classList.toggle('active', view === 'list');
+        renderView(view);
+        ['scatter', 'stack', 'list'].forEach(v => {
+            document.getElementById(`btn-${v}`).classList.toggle('active', v === view);
+        });
     }
 
     // ── Dragging ─────────────────────────────────────────────────────
@@ -205,8 +209,8 @@
 
     document.addEventListener('touchend', () => { activeWin = null; });
 
-    // ── Window creation ───────────────────────────────────────────────
-    function createWindow(title, content, x, y) {
+    // ── Window builder (shared) ───────────────────────────────────────
+    function buildWindow(title, content) {
         const win = document.createElement('div');
         win.className = 'textedit-win';
 
@@ -239,25 +243,23 @@
 
         const handle = document.createElement('div');
         handle.className = 'resize-handle';
-
-        red.addEventListener('click', () => { win.style.display = 'none'; });
         win.appendChild(handle);
 
-        if (isMobile) {
-            bar.addEventListener('click', e => {
-                if (e.target.classList.contains('tl-red')) return;
-                if (mobileView === 'list') win.classList.toggle('expanded');
-            });
-            document.getElementById('win-container').appendChild(win);
-        } else {
-            win.style.left   = x + 'px';
-            win.style.top    = y + 'px';
-            win.style.height = '200px';
-            win.style.zIndex = ++zTop;
-            document.body.appendChild(win);
-            makeDraggable(win, bar);
-            makeResizable(win, handle);
-        }
+        red.addEventListener('click', () => { win.style.display = 'none'; });
+
+        return { win, bar, handle };
+    }
+
+    // ── Desktop window creation ───────────────────────────────────────
+    function createWindow(title, content, x, y) {
+        const { win, bar, handle } = buildWindow(title, content);
+        win.style.left   = x + 'px';
+        win.style.top    = y + 'px';
+        win.style.height = '200px';
+        win.style.zIndex = ++zTop;
+        document.body.appendChild(win);
+        makeDraggable(win, bar);
+        makeResizable(win, handle);
     }
 
     function makeResizable(win, handle) {
@@ -279,6 +281,37 @@
         });
     }
 
+    // ── Mobile render ─────────────────────────────────────────────────
+    function renderView(view) {
+        document.querySelectorAll('.textedit-win').forEach(w => w.remove());
+        const container = document.getElementById('win-container');
+        container.classList.toggle('list-view', view === 'list');
+
+        if (view === 'scatter') {
+            const positions = scatter(notesData.length);
+            notesData.forEach(({ title, content }, i) => {
+                const { win, bar } = buildWindow(`${title}.txt`, content);
+                win.style.left   = positions[i][0] + 'px';
+                win.style.top    = positions[i][1] + 'px';
+                win.style.height = '200px';
+                win.style.zIndex = ++zTop;
+                document.body.appendChild(win);
+                makeDraggable(win, bar);
+            });
+        } else {
+            notesData.forEach(({ title, content }) => {
+                const { win, bar } = buildWindow(`${title}.txt`, content);
+                if (view === 'list') {
+                    bar.addEventListener('click', e => {
+                        if (e.target.classList.contains('tl-red')) return;
+                        win.classList.toggle('expanded');
+                    });
+                }
+                container.appendChild(win);
+            });
+        }
+    }
+
     // ── Random scatter placement ──────────────────────────────────────
     function scatter(count) {
         const WIN_W = 320, WIN_H = 200;
@@ -292,15 +325,13 @@
         return positions;
     }
 
-    // ── Notion fetch ──────────────────────────────────────────────────
+    // ── Data fetch ────────────────────────────────────────────────────
     async function loadNotes() {
         const status = document.getElementById('status');
-
         status.textContent = 'loading...';
 
         try {
             const res = await fetch(THOUGHTS_API);
-
             if (!res.ok) {
                 status.textContent = `[error ${res.status}]`;
                 return;
@@ -309,10 +340,15 @@
             const data = await res.json();
             status.textContent = '';
 
-            const positions = scatter(data.length);
-            data.forEach(({ title, content }, i) => {
-                createWindow(`${title}.txt`, content, positions[i][0], positions[i][1]);
-            });
+            if (isMobile) {
+                notesData = data;
+                renderView(mobileView);
+            } else {
+                const positions = scatter(data.length);
+                data.forEach(({ title, content }, i) => {
+                    createWindow(`${title}.txt`, content, positions[i][0], positions[i][1]);
+                });
+            }
         } catch (err) {
             status.textContent = '[could not load notes]';
         }
