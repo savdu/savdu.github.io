@@ -291,10 +291,12 @@
             const positions = scatter(notesData.length);
             notesData.forEach(({ title, content }, i) => {
                 const { win, bar } = buildWindow(`${title}.txt`, content);
-                win.style.left   = positions[i][0] + 'px';
-                win.style.top    = positions[i][1] + 'px';
-                win.style.height = '200px';
-                win.style.zIndex = ++zTop;
+                win.style.position = 'fixed';
+                win.style.width    = '300px';
+                win.style.left     = positions[i][0] + 'px';
+                win.style.top      = positions[i][1] + 'px';
+                win.style.height   = '200px';
+                win.style.zIndex   = ++zTop;
                 document.body.appendChild(win);
                 makeDraggable(win, bar);
             });
