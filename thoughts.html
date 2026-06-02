@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>sav's thoughts</title>
-    <link rel="stylesheet" href="../site.css">
+    <link rel="stylesheet" href="site.css">
     <style>
         .textedit-win {
             position: fixed;
@@ -69,10 +69,57 @@
             cursor: nwse-resize;
         }
 
+        #win-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
         #status {
             font-family: 'Menlo', monospace;
             font-size: small;
             color: #888;
+        }
+
+        #view-toggle { display: none; }
+
+        @media (max-width: 600px) {
+            .textedit-win {
+                position: relative;
+                width: 100%;
+            }
+            .textedit-body {
+                height: auto;
+                max-height: none;
+            }
+            .resize-handle { display: none; }
+            .textedit-bar  { cursor: default; }
+
+            #view-toggle {
+                display: flex;
+                gap: 4px;
+                margin: 8px 0 0;
+            }
+            .view-btn {
+                background: none;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                padding: 5px 8px;
+                cursor: pointer;
+                color: #aaa;
+                line-height: 0;
+            }
+            .view-btn.active {
+                background: #f0f0f0;
+                color: #444;
+                border-color: #999;
+            }
+
+            /* list view: hide body, remove bar border when collapsed */
+            #win-container.list-view .textedit-body { display: none; }
+            #win-container.list-view .textedit-win:not(.expanded) .textedit-bar { border-bottom: none; }
+            #win-container.list-view .textedit-win.expanded .textedit-body { display: block; }
         }
     </style>
 </head>
@@ -80,11 +127,32 @@
 <div class="container">
     <a href="/index.html">back</a><br><br>
     <p>a freeform collection of my latest thoughts</p>
+    <div id="view-toggle">
+        <button class="view-btn active" id="btn-stack" onclick="setView('stack')" title="expanded view">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="6" rx="1" fill="currentColor"/><rect x="1" y="9" width="14" height="6" rx="1" fill="currentColor"/></svg>
+        </button>
+        <button class="view-btn" id="btn-list" onclick="setView('list')" title="list view">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="14" height="2.5" rx="1" fill="currentColor"/><rect x="1" y="6.75" width="14" height="2.5" rx="1" fill="currentColor"/><rect x="1" y="11.5" width="14" height="2.5" rx="1" fill="currentColor"/></svg>
+        </button>
+    </div>
     <span id="status"></span>
+    <div id="win-container"></div>
 </div>
 
 <script>
     const THOUGHTS_API = '/api/thoughts';
+    const isMobile = window.innerWidth < 600;
+    let mobileView = 'stack';
+
+    function setView(view) {
+        mobileView = view;
+        document.getElementById('win-container').classList.toggle('list-view', view === 'list');
+        if (view === 'list') {
+            document.querySelectorAll('.textedit-win').forEach(w => w.classList.remove('expanded'));
+        }
+        document.getElementById('btn-stack').classList.toggle('active', view === 'stack');
+        document.getElementById('btn-list').classList.toggle('active', view === 'list');
+    }
 
     // ── Dragging ─────────────────────────────────────────────────────
     let activeWin = null, ox, oy, zTop = 1000;
@@ -141,10 +209,6 @@
     function createWindow(title, content, x, y) {
         const win = document.createElement('div');
         win.className = 'textedit-win';
-        win.style.left   = x + 'px';
-        win.style.top    = y + 'px';
-        win.style.height = '200px';
-        win.style.zIndex = ++zTop;
 
         const bar = document.createElement('div');
         bar.className = 'textedit-bar';
@@ -178,9 +242,22 @@
 
         red.addEventListener('click', () => { win.style.display = 'none'; });
         win.appendChild(handle);
-        document.body.appendChild(win);
-        makeDraggable(win, bar);
-        makeResizable(win, handle);
+
+        if (isMobile) {
+            bar.addEventListener('click', e => {
+                if (e.target.classList.contains('tl-red')) return;
+                if (mobileView === 'list') win.classList.toggle('expanded');
+            });
+            document.getElementById('win-container').appendChild(win);
+        } else {
+            win.style.left   = x + 'px';
+            win.style.top    = y + 'px';
+            win.style.height = '200px';
+            win.style.zIndex = ++zTop;
+            document.body.appendChild(win);
+            makeDraggable(win, bar);
+            makeResizable(win, handle);
+        }
     }
 
     function makeResizable(win, handle) {
