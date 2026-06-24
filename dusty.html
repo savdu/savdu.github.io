@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dusty &amp; Crumby</title>
+<link rel="stylesheet" href="site.css">
+<style>
+  .scene {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    background: transparent;
+    position: relative;
+  }
+
+  /* Tileable 8-bit grass tuft pattern, drawn as a tiny inline SVG (no image
+     asset needed) and scaled up with pixelated rendering to stay crisp.
+     Only shown during movable/roaming beats. */
+  #grass-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    display: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' fill='%236cb33f'/%3E%3Crect x='2' y='3' width='1' height='2' fill='%234f9130'/%3E%3Crect x='9' y='7' width='1' height='2' fill='%234f9130'/%3E%3Crect x='13' y='2' width='1' height='1' fill='%234f9130'/%3E%3Crect x='5' y='11' width='2' height='1' fill='%234f9130'/%3E%3Crect x='11' y='12' width='1' height='2' fill='%234f9130'/%3E%3Crect x='4' y='9' width='1' height='1' fill='%233c7322'/%3E%3Crect x='12' y='5' width='1' height='1' fill='%233c7322'/%3E%3Crect x='7' y='1' width='1' height='1' fill='%234f9130'/%3E%3Crect x='1' y='13' width='1' height='1' fill='%234f9130'/%3E%3C/svg%3E");
+    background-size: 64px 64px;
+    background-repeat: repeat;
+    image-rendering: pixelated;
+  }
+
+  .stage {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    min-height: 140px;
+    padding: 5.5rem 1rem 0.5rem;
+    /* border-bottom: 2px solid #333; */
+  }
+
+  .character {
+    position: relative;
+  }
+
+  .sprite {
+    width: 160px;
+    max-width: 40vw;
+    height: auto;
+    display: block;
+  }
+
+  .roamer {
+    position: fixed;
+    width: 96px;
+    height: 192px;
+    background-repeat: no-repeat;
+    background-size: 1152px 1536px;
+    image-rendering: pixelated;
+    pointer-events: none;
+    z-index: 1000;
+    display: none;
+  }
+
+  #dusty-roamer {
+    background-image: url("assets/sav-motion.png");
+  }
+
+  #crumby-roamer {
+    background-image: url("assets/alex-motion.png");
+  }
+
+  .bubble {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 10px;
+    max-width: 180px;
+    background: transparent;
+    color: #111;
+    border: 1px solid #111;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.85em;
+    text-align: center;
+    visibility: hidden;
+  }
+
+  .bubble.visible {
+    visibility: visible;
+  }
+
+  .bubble::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #111;
+  }
+
+  .item {
+    position: fixed;
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    pointer-events: none;
+  }
+
+  /* Sized separately from .item so growing the emoji doesn't grow the
+     bubble's font-size too (it inherits .bubble's own font-size, not this). */
+  .item-emoji {
+    font-size: 40px;
+    line-height: 1;
+  }
+
+  /* Item bubbles escape the item's box and are repositioned via JS each
+     frame to follow whichever sprite is currently touching the item. */
+  .item-bubble {
+    position: fixed;
+    bottom: auto;
+    left: 0;
+    background-color: white;
+    margin-bottom: 0;
+    transform: translate(-50%, -100%);
+  }
+
+  .dialogue-box {
+    border: 1px solid #333;
+    padding: 1rem;
+    min-height: 3em;
+    margin-top: 1rem;
+    background-color: white;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+  }
+
+  .choice-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: inherit;
+    padding: 0.5rem 1.25rem;
+    cursor: pointer;
+    background-color: white;
+    border: 1px solid;
+  }
+
+  button:hover {
+    background-color: black;
+    color: white;
+    cursor: default;
+  }
+
+  button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+</style>
+</head>
+<body>
+  <div id="grass-bg"></div>
+  <div class="scene">
+    <div class="stage">
+      <div class="character dusty">
+        <div class="bubble" id="dusty-bubble"></div>
+        <img class="sprite" src="assets/sav.png" alt="Dusty">
+      </div>
+      <div class="character crumby">
+        <div class="bubble" id="crumby-bubble"></div>
+        <img class="sprite" src="assets/alex.png" alt="Crumby">
+      </div>
+    </div>
+
+    <div class="dialogue-box" id="dialogue-box"></div>
+
+    <div class="controls">
+      <button id="back-btn">back</button>
+      <div class="choice-group" id="choice-group"></div>
+      <button id="next-btn">next</button>
+    </div>
+  </div>
+
+  <div class="roamer" id="dusty-roamer"></div>
+  <div class="roamer" id="crumby-roamer"></div>
+  <div id="items-layer"></div>
+  <div class="bubble item-bubble" id="dusty-collide-bubble">❤️</div>
+  <div class="bubble item-bubble" id="crumby-collide-bubble">❤️</div>
+
+  <script src="dusty-data.js"></script>
+  <script>
+    const dialogueBox = document.getElementById("dialogue-box");
+    const grassBg = document.getElementById("grass-bg");
+    const bubbles = {
+      dusty: document.getElementById("dusty-bubble"),
+      crumby: document.getElementById("crumby-bubble")
+    };
+    const collideBubbles = {
+      dusty: document.getElementById("dusty-collide-bubble"),
+      crumby: document.getElementById("crumby-collide-bubble")
+    };
+    const characterEls = {
+      dusty: document.querySelector(".character.dusty"),
+      crumby: document.querySelector(".character.crumby")
+    };
+    const nextBtn = document.getElementById("next-btn");
+    const backBtn = document.getElementById("back-btn");
+    const choiceGroup = document.getElementById("choice-group");
+
+    // Roaming sprites: each character's motion sheet is a 12-col x 8-row grid
+    // of 48x96 cells. Each row holds two directions (a cardinal + a diagonal),
+    // each with its own 3-frame walk cycle and 3-frame run cycle:
+    //   cols 0-2  = cardinal walk   cols 3-5  = diagonal walk
+    //   cols 6-8  = cardinal run    cols 9-11 = diagonal run
+    // (within each 3-col group, the middle frame is the idle/standing pose)
+    const ROAM_W = 96; // 48px cell x 2 display scale
+    const ROAM_H = 192; // 96px cell x 2 display scale
+    const FRAME_INTERVAL = 120;
+    const FRAME_PATTERN = [1, 0, 1, 2]; // offsets within a 3-col group; index 0 = idle
+
+    const ROW_DIRECTIONS = [
+      { cardinal: "down", diagonal: "down-left" },
+      { cardinal: "left", diagonal: "down-right" },
+      { cardinal: "right", diagonal: "up-left" },
+      { cardinal: "up", diagonal: "up-right" }
+    ];
+    const DIRECTION_INFO = {};
+    ROW_DIRECTIONS.forEach((entry, row) => {
+      DIRECTION_INFO[entry.cardinal] = { row, slot: "cardinal" };
+      DIRECTION_INFO[entry.diagonal] = { row, slot: "diagonal" };
+    });
+
+    // Per-character movement: crumby runs (right-half running frames, double
+    // speed), dusty walks (left-half walk-cycle frames, base speed).
+    const CHARACTER_CONFIG = {
+      dusty: { speed: 4, animMode: "walk" },
+      crumby: { speed: 8, animMode: "run" }
+    };
+
+    const roamerEls = {
+      dusty: document.getElementById("dusty-roamer"),
+      crumby: document.getElementById("crumby-roamer")
+    };
+
+    // When both characters roam at once (e.g. scene9), each is locked to its
+    // own key scheme so one set of keypresses doesn't move both at once.
+    // With only one character roaming, either scheme works (see isKeyPressedFor).
+    const CONTROL_SCHEMES = {
+      dusty: { up: ["w"], down: ["s"], left: ["a"], right: ["d"] },
+      crumby: { up: ["arrowup"], down: ["arrowdown"], left: ["arrowleft"], right: ["arrowright"] }
+    };
+
+    const pressedKeys = new Set();
+    const roamStates = {};
+    let roamRafId = null;
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function isKeyPressedFor(name, direction) {
+      const soloRoaming = Object.keys(roamStates).length === 1;
+      if (soloRoaming) {
+        return Object.values(CONTROL_SCHEMES).some((scheme) =>
+          scheme[direction].some((key) => pressedKeys.has(key))
+        );
+      }
+      return CONTROL_SCHEMES[name][direction].some((key) => pressedKeys.has(key));
+    }
+
+    function onRoamKeyDown(e) {
+      const key = e.key.toLowerCase();
+      if (["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d"].includes(key)) {
+        e.preventDefault();
+        pressedKeys.add(key);
+      }
+    }
+
+    function onRoamKeyUp(e) {
+      pressedKeys.delete(e.key.toLowerCase());
+    }
+
+    function renderRoamer(state) {
+      const { row, slot } = DIRECTION_INFO[state.dir];
+      const colBase = (slot === "cardinal" ? 0 : 3) + (state.animMode === "run" ? 6 : 0);
+      const col = colBase + FRAME_PATTERN[state.walkStep];
+      state.el.style.left = `${state.x}px`;
+      state.el.style.top = `${state.y}px`;
+      state.el.style.backgroundPosition = `-${col * ROAM_W}px -${row * ROAM_H}px`;
+    }
+
+    function startRoaming(name) {
+      const el = roamerEls[name];
+      if (!el) return;
+      el.style.display = "block";
+      roamStates[name] = {
+        el,
+        x: window.innerWidth / 2 - ROAM_W / 2,
+        y: window.innerHeight / 2 - ROAM_H / 2,
+        dir: "down",
+        walkStep: 0,
+        lastFrameTime: 0,
+        speed: CHARACTER_CONFIG[name].speed,
+        animMode: CHARACTER_CONFIG[name].animMode
+      };
+      renderRoamer(roamStates[name]);
+      if (!roamRafId) {
+        window.addEventListener("keydown", onRoamKeyDown);
+        window.addEventListener("keyup", onRoamKeyUp);
+        roamRafId = requestAnimationFrame(roamTick);
+      }
+    }
+
+    function stopRoaming(name) {
+      const state = roamStates[name];
+      if (!state) return;
+      state.el.style.display = "none";
+      delete roamStates[name];
+      if (Object.keys(roamStates).length === 0 && roamRafId) {
+        cancelAnimationFrame(roamRafId);
+        roamRafId = null;
+        window.removeEventListener("keydown", onRoamKeyDown);
+        window.removeEventListener("keyup", onRoamKeyUp);
+        pressedKeys.clear();
+        // Nothing will tick updateCharacterCollision() again to clear these
+        // once roaming fully stops, so hide them here instead of leaving
+        // a heart bubble stuck on screen.
+        collideBubbles.dusty.classList.remove("visible");
+        collideBubbles.crumby.classList.remove("visible");
+      }
+    }
+
+    // Emoji items: randomly placed each time their beat is entered. While a
+    // roaming character's bounding box overlaps an item's, that item's
+    // dialogue bubble shows above it (not above the character).
+    const ITEM_SIZE = 72;
+    // Bigger margins than the item's own size to leave room for its bubble
+    // (up to 180px wide, and it appears above the item) so neither clips
+    // against the viewport edge.
+    const ITEM_EDGE_MARGIN_X = 90;
+    const ITEM_EDGE_MARGIN_TOP = 80;
+    const ITEM_EDGE_MARGIN_BOTTOM = 20;
+    const itemsLayer = document.getElementById("items-layer");
+    let activeItems = [];
+
+    function clearItems() {
+      activeItems.forEach((item) => item.el.remove());
+      activeItems = [];
+    }
+
+    // Keeps items from spawning on top of the narration text, which is hard
+    // to read with an emoji behind/in front of it. A small padding gives the
+    // text some breathing room rather than letting items butt right up against it.
+    const TEXT_EXCLUSION_PADDING = 12;
+
+    function rectOverlapsBox(x, y, size, box, padding) {
+      return (
+        x < box.right + padding &&
+        x + size > box.left - padding &&
+        y < box.bottom + padding &&
+        y + size > box.top - padding
+      );
+    }
+
+    function randomItemPosition() {
+      const minX = ITEM_EDGE_MARGIN_X;
+      const maxX = window.innerWidth - ITEM_SIZE - ITEM_EDGE_MARGIN_X;
+      const minY = ITEM_EDGE_MARGIN_TOP;
+      const maxY = window.innerHeight - ITEM_SIZE - ITEM_EDGE_MARGIN_BOTTOM;
+      const textBox = dialogueBox.getBoundingClientRect();
+
+      let x;
+      let y;
+      for (let attempt = 0; attempt < 20; attempt++) {
+        x = minX + Math.random() * Math.max(0, maxX - minX);
+        y = minY + Math.random() * Math.max(0, maxY - minY);
+        if (!rectOverlapsBox(x, y, ITEM_SIZE, textBox, TEXT_EXCLUSION_PADDING)) break;
+      }
+      return { x, y };
+    }
+
+    function spawnItems(itemDefs) {
+      clearItems();
+      itemDefs.forEach((def) => {
+        const el = document.createElement("div");
+        el.className = "item";
+        const { x, y } = randomItemPosition();
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+
+        const bubbleEl = document.createElement("div");
+        bubbleEl.className = "bubble item-bubble";
+        bubbleEl.textContent = def.text;
+
+        const emojiEl = document.createElement("span");
+        emojiEl.className = "item-emoji";
+        emojiEl.textContent = def.emoji;
+
+        el.appendChild(bubbleEl);
+        el.appendChild(emojiEl);
+
+        itemsLayer.appendChild(el);
+        activeItems.push({ el, bubbleEl, x, y });
+      });
+    }
+
+    function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+      return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+    }
+
+    const BUBBLE_GAP = 4;
+    const BUBBLE_TOP_MARGIN = 4; // keeps the bubble from clipping off the viewport's top edge
+
+    function positionBubbleAboveRoamer(bubbleEl, state) {
+      const anchorX = state.x + ROAM_W / 2;
+      const anchorY = state.y - BUBBLE_GAP;
+      bubbleEl.style.left = `${anchorX}px`;
+      bubbleEl.style.top = `${anchorY}px`;
+      // Text wrapping keeps the bubble's width in bounds, but its height
+      // (and therefore how far above its anchor it extends) varies with
+      // content, so it's only checked — and corrected — after layout.
+      const rect = bubbleEl.getBoundingClientRect();
+      if (rect.top < BUBBLE_TOP_MARGIN) {
+        bubbleEl.style.top = `${anchorY + (BUBBLE_TOP_MARGIN - rect.top)}px`;
+      }
+    }
+
+    // If a roamer overlaps multiple items at once, only the nearest one
+    // shows its bubble — otherwise overlapping items would all pop their
+    // bubbles up simultaneously, cluttering the screen.
+    function updateItemCollisions() {
+      const chosenItemByRoamer = {};
+      Object.entries(roamStates).forEach(([name, state]) => {
+        let nearestItem = null;
+        let nearestDist = Infinity;
+        activeItems.forEach((item) => {
+          if (!rectsOverlap(state.x, state.y, ROAM_W, ROAM_H, item.x, item.y, ITEM_SIZE, ITEM_SIZE)) return;
+          const dx = state.x + ROAM_W / 2 - (item.x + ITEM_SIZE / 2);
+          const dy = state.y + ROAM_H / 2 - (item.y + ITEM_SIZE / 2);
+          const dist = Math.hypot(dx, dy);
+          if (dist < nearestDist) {
+            nearestDist = dist;
+            nearestItem = item;
+          }
+        });
+        if (nearestItem) chosenItemByRoamer[name] = nearestItem;
+      });
+
+      const chosenItems = new Set(Object.values(chosenItemByRoamer));
+
+      activeItems.forEach((item) => {
+        const isChosen = chosenItems.has(item);
+        item.bubbleEl.classList.toggle("visible", isChosen);
+        if (isChosen) {
+          const roamerName = Object.keys(chosenItemByRoamer).find(
+            (name) => chosenItemByRoamer[name] === item
+          );
+          positionBubbleAboveRoamer(item.bubbleEl, roamStates[roamerName]);
+        }
+      });
+    }
+
+    // When both Dusty and Crumby are roaming in the same scene, show a heart
+    // above each of them for as long as their sprites overlap.
+    function updateCharacterCollision() {
+      const dustyState = roamStates.dusty;
+      const crumbyState = roamStates.crumby;
+      const colliding =
+        !!dustyState &&
+        !!crumbyState &&
+        rectsOverlap(dustyState.x, dustyState.y, ROAM_W, ROAM_H, crumbyState.x, crumbyState.y, ROAM_W, ROAM_H);
+
+      collideBubbles.dusty.classList.toggle("visible", colliding);
+      collideBubbles.crumby.classList.toggle("visible", colliding);
+      if (colliding) {
+        positionBubbleAboveRoamer(collideBubbles.dusty, dustyState);
+        positionBubbleAboveRoamer(collideBubbles.crumby, crumbyState);
+      }
+    }
+
+    // Reconciles which characters should be roaming for the current beat.
+    // Characters already roaming are left exactly where they are (position,
+    // direction, walk frame) so consecutive movable beats with the same
+    // character don't snap back to center — only the text changes.
+    function syncRoaming(desiredNames) {
+      Object.keys(roamStates).forEach((name) => {
+        if (!desiredNames.includes(name)) stopRoaming(name);
+      });
+      desiredNames.forEach((name) => {
+        if (!roamStates[name]) startRoaming(name);
+      });
+    }
+
+    function roamTick(timestamp) {
+      Object.entries(roamStates).forEach(([name, state]) => {
+        let vert = null;
+        let horiz = null;
+        if (isKeyPressedFor(name, "up")) vert = "up";
+        else if (isKeyPressedFor(name, "down")) vert = "down";
+        if (isKeyPressedFor(name, "left")) horiz = "left";
+        else if (isKeyPressedFor(name, "right")) horiz = "right";
+
+        let dx = 0;
+        let dy = 0;
+        if (vert === "up") dy -= state.speed;
+        if (vert === "down") dy += state.speed;
+        if (horiz === "left") dx -= state.speed;
+        if (horiz === "right") dx += state.speed;
+
+        const moving = dx !== 0 || dy !== 0;
+        state.x = clamp(state.x + dx, 0, window.innerWidth - ROAM_W);
+        state.y = clamp(state.y + dy, 0, window.innerHeight - ROAM_H);
+        if (moving) {
+          state.dir = vert && horiz ? `${vert}-${horiz}` : vert || horiz;
+        }
+
+        if (moving && timestamp - state.lastFrameTime > FRAME_INTERVAL) {
+          state.walkStep = (state.walkStep + 1) % FRAME_PATTERN.length;
+          state.lastFrameTime = timestamp;
+        } else if (!moving) {
+          state.walkStep = 0;
+        }
+
+        renderRoamer(state);
+      });
+      updateItemCollisions();
+      updateCharacterCollision();
+      roamRafId = requestAnimationFrame(roamTick);
+    }
+
+    const history = [];
+    let currentId = story.start;
+
+    function goTo(nextId) {
+      if (!nextId) return;
+      history.push(currentId);
+      currentId = nextId;
+      render();
+    }
+
+    function render() {
+      const beat = story.beats[currentId];
+      const onStage = beat.characters || [];
+      const isMovable = beat.mode === "movable";
+
+      grassBg.style.display = isMovable ? "block" : "none";
+
+      syncRoaming(isMovable ? onStage : []);
+
+      // Set narration text before spawning items, so item placement can read
+      // the new (not stale) text box size when avoiding overlap with it.
+      dialogueBox.textContent = beat.narration || "";
+
+      if (beat.items) {
+        spawnItems(beat.items);
+      } else {
+        clearItems();
+      }
+
+      Object.keys(characterEls).forEach((name) => {
+        characterEls[name].style.display = onStage.includes(name) && !isMovable ? "" : "none";
+      });
+
+      Object.keys(bubbles).forEach((name) => {
+        const isSpeaking = !!beat.dialogue && beat.dialogue.speaker === name;
+        bubbles[name].classList.toggle("visible", isSpeaking);
+        bubbles[name].textContent = isSpeaking ? beat.dialogue.text : "";
+      });
+
+      backBtn.disabled = history.length === 0;
+
+      choiceGroup.innerHTML = "";
+      if (beat.choices) {
+        nextBtn.style.display = "none";
+        choiceGroup.style.display = "flex";
+        beat.choices.forEach((choice) => {
+          const btn = document.createElement("button");
+          btn.textContent = choice.label;
+          btn.addEventListener("click", () => goTo(choice.next));
+          choiceGroup.appendChild(btn);
+        });
+      } else {
+        choiceGroup.style.display = "none";
+        nextBtn.style.display = "";
+        nextBtn.disabled = !beat.next;
+        nextBtn.textContent = beat.next ? "next" : "the end";
+      }
+    }
+
+    nextBtn.addEventListener("click", () => {
+      goTo(story.beats[currentId].next);
+    });
+
+    backBtn.addEventListener("click", () => {
+      if (history.length === 0) return;
+      currentId = history.pop();
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
