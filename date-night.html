@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>date night bingo</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- ============================================================
+         EVENT CONFIG
+         ============================================================ -->
+    <style>
+        :root {
+            --gradient: linear-gradient(135deg, #bdf2ea, #7fd8d0, #4aacab);
+            --text: rgb(8, 64, 64);
+            --border: rgb(8, 64, 64);
+            --placeholder: rgb(45, 100, 100);
+            --font-body: "Space Mono", monospace;
+            --font-heading: "Silkscreen", sans-serif;
+        }
+
+        .btn { border-width: 1px; }
+        .btn.disabled { opacity: 0.35; pointer-events: none; }
+        .container { padding: 1.5rem 0.5rem; }
+    </style>
+    <!-- ============================================================
+         END EVENT CONFIG
+         ============================================================ -->
+
+    <style>
+        a.back { align-self: flex-start; margin-left: 4px; color: var(--text); }
+
+        #step-board .emoji { line-height: 1; margin-top: 0; margin-bottom: 0.2em; }
+
+        .subtitle { font-size: 0.7rem; color: var(--placeholder); margin-top: -8px; margin-bottom: 1.2em; max-width: 420px; }
+
+        /* ---------- step 1: list editor ---------- */
+        #pool-list { width: 100%; max-width: 420px; margin: 0 auto; }
+
+        .pool-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-align: left;
+            font-size: 0.7rem;
+            margin-bottom: 6px;
+        }
+
+        .pool-text {
+            flex: 1;
+            min-width: 0;
+            padding: 4px 6px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            background: rgba(255,255,255,0.5);
+            color: var(--text);
+            font-family: var(--font-body);
+            font-size: 0.7rem;
+        }
+
+        .pool-check { flex-shrink: 0; width: 20px; height: 20px; accent-color: var(--border); }
+
+        .stepper { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+        .stepper-count { min-width: 12px; text-align: center; font-weight: bold; }
+        .pool-hint { font-size: 0.6rem; color: var(--placeholder); flex-shrink: 0; white-space: nowrap; }
+
+        .mini-btn {
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            width: 28px;
+            height: 28px;
+            line-height: 1;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            flex-shrink: 0;
+            padding: 0;
+        }
+        .mini-btn.del { border-radius: 6px; width: auto; min-width: 28px; padding: 0 8px; }
+        .mini-btn:hover { transform: scale(1.1); }
+
+        #add-item-form { display: flex; gap: 8px; max-width: 420px; margin: 14px auto 6px; }
+        #add-item-form input { flex: 1; }
+        #add-item-form button { font-family: var(--font-body); font-size: 0.7rem; border: 1px solid var(--border); background: transparent; color: var(--text); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+
+        .count-display { margin: 14px 0 4px; font-weight: bold; font-size: 0.75rem; }
+        .count-display.ok { color: #1b7a3e; }
+        .count-display.bad { color: #b3382c; }
+
+        .tiny-link { font-size: 0.65rem; color: var(--placeholder); text-decoration: underline; cursor: pointer; background: none; border: none; font-family: var(--font-body); margin-top: 1.2em; }
+
+        /* ---------- step 2: board ---------- */
+        .board-instructions { font-size: 0.68rem; max-width: 420px; margin: 0 auto 12px; color: var(--placeholder); }
+
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .cell {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.62rem;
+            line-height: 1.15;
+            padding: 3px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border);
+            cursor: pointer;
+            word-break: break-word;
+            transition: transform .15s ease, background .2s ease, color .2s ease;
+            background: rgba(255,255,255,0.45);
+            color: var(--text);
+        }
+        .cell:hover { transform: scale(1.04); }
+
+        .cell.free { background: var(--border); color: white; font-weight: bold; font-size: 0.62rem; cursor: default; }
+        .cell.free:hover { transform: none; }
+
+        .cell.empty { border-style: dashed; background: rgba(255,255,255,0.15); color: var(--placeholder); font-size: 1.1rem; }
+
+        .cell.confirmed { background: var(--border); color: white; }
+
+        .hidden { display: none; }
+
+        .bank {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            max-width: 460px;
+            margin: 16px auto;
+        }
+
+        .chip {
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            padding: 5px 10px;
+            font-size: 0.62rem;
+            cursor: pointer;
+            background: rgba(255,255,255,0.5);
+            color: var(--text);
+            transition: transform .15s ease, background .2s ease, color .2s ease;
+        }
+        .chip:hover { transform: scale(1.05); }
+        .chip.selected { background: var(--border); color: white; }
+
+        .board-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 10px; }
+        .board-actions .btn { display: inline-block; width: auto; margin: 0; padding: 6px 14px; }
+
+        #bingo-banner {
+            position: fixed;
+            top: 38%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            font-family: var(--font-heading);
+            font-size: 1.6rem;
+            color: var(--text);
+            background: white;
+            padding: 18px 26px;
+            border-radius: 16px;
+            border: 2px solid var(--border);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s ease, transform .3s ease;
+            z-index: 2000;
+            text-align: center;
+        }
+        #bingo-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="page active" id="step-list">
+        <h1>date night bingo</h1>
+        <p class="subtitle">confirm your 24 squares — check or uncheck, edit the wording, or add your own</p>
+
+        <div id="pool-list"></div>
+
+        <form id="add-item-form">
+            <input type="text" id="add-item-input" class="pool-text" placeholder="add your own...">
+            <button type="submit">add</button>
+        </form>
+
+        <div id="count-display" class="count-display"></div>
+        <a href="#" class="btn" id="confirm-list-btn">confirm list →</a>
+        <br>
+        <button type="button" class="tiny-link" id="reset-defaults-btn">reset to original list</button>
+    </div>
+
+    <div class="page" id="step-board">
+        <div class="emoji">🎯</div>
+        <h1>date night bingo</h1>
+        <a href="#" id="edit-list-link" style="font-size:0.65rem; color: var(--placeholder); margin-top:-10px; margin-bottom: 14px; display:inline-block;">← edit list</a>
+
+        <p class="board-instructions" id="placing-instructions">
+            tap a square below, then tap a spot on the board to place it. tap a filled spot again to send it back (or tap a new square first to swap it in). free space is already yours.
+        </p>
+        <p class="board-instructions hidden" id="playing-instructions">
+            tap a square to confirm it. tap again to unconfirm. get 5 in a row for bingo!
+        </p>
+
+        <div class="bingo-grid" id="bingo-grid"></div>
+
+        <div id="bank-wrap">
+            <div class="bank" id="bank"></div>
+            <div class="board-actions">
+                <a href="#" class="btn" id="shuffle-btn">🎲 shuffle randomly</a>
+                <a href="#" class="btn" id="confirm-board-btn">confirm board →</a>
+            </div>
+        </div>
+
+        <div id="playing-controls" class="hidden">
+            <div class="board-actions">
+                <a href="#" class="btn" id="reset-marks-btn">↺ reset marks</a>
+                <a href="#" class="btn" id="rearrange-btn">🔁 rearrange squares</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="bingo-banner"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script>
+(function () {
+    const STORAGE_KEY = 'savs-date-night-bingo-v1';
+
+    const DEFAULT_ITEMS = [
+        { id: 'first-date', text: 'First date', max: 1 },
+        { id: 'alex-outfit', text: 'Cool guy outfit Alex likes', max: 3 },
+        { id: 'tourist-family', text: 'Tourist family', max: 1 },
+        { id: 'alex-compliment', text: 'Alex gets a compliment', max: 1 },
+        { id: 'sav-compliment', text: 'Sav gets a compliment', max: 1 },
+        { id: 'date-going-well', text: 'See a date going really well', max: 1 },
+        { id: 'date-going-badly', text: 'See a date going not well', max: 1 },
+        { id: 'finance-bro', text: '6” blue eyes man in finance', max: 1 },
+        { id: 'dyed-hair', text: 'Dyed hair', max: 1 },
+        { id: 'tattoo-sleeve', text: 'Tattoo sleeve', max: 1 },
+        { id: 'mesh-flats', text: 'Mesh flats', max: 1 },
+        { id: 'short-guy-couple', text: 'Guy shorter than girl couple', max: 1 },
+        { id: 'flowers-couple', text: 'Couple with flowers', max: 1 },
+        { id: 'phone-argument', text: 'Phone argument', max: 1 },
+        { id: 'plastic-surgery', text: 'Obvious plastic surgery', max: 1 },
+        { id: 'rat', text: 'Rat', max: 1 },
+        { id: 'bump-into-someone', text: 'Bump into someone you know', max: 1 },
+        { id: 'doppelgangers', text: 'Find our doppelgangers', max: 1 },
+        { id: 'cool-old-person', text: 'Cool old person', max: 1 },
+        { id: 'sunglasses-at-night', text: 'Guy wearing sunglasses at night', max: 1 },
+        { id: 'trader-joes-bag', text: 'Trader Joe’s paper bag', max: 1 },
+        { id: 'tiny-dog', text: 'Tiny dog', max: 1 },
+        { id: 'west-village-girl', text: 'West village girl', max: 1 },
+        { id: 'bushwick-boy', text: 'Bushwick boy', max: 1 },
+        { id: 'performative', text: 'Performative', max: 1 },
+    ];
+
+    const LINES = [
+        [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24],
+        [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24],
+        [0,6,12,18,24],[4,8,12,16,20],
+    ];
+
+    let state;
+    let bannerTimer;
+
+    function uid() {
+        return 'item-' + Math.random().toString(36).slice(2, 9);
+    }
+
+    function emptyPlacement() {
+        const p = Array(25).fill(null);
+        p[12] = 'FREE';
+        return p;
+    }
+
+    function emptyConfirmed() {
+        const c = Array(25).fill(false);
+        c[12] = true;
+        return c;
+    }
+
+    function defaultState() {
+        return {
+            step: 'list',
+            pool: DEFAULT_ITEMS.map(d => ({ id: d.id, text: d.text, count: d.max, max: d.max })),
+            texts: [],
+            placement: emptyPlacement(),
+            confirmed: emptyConfirmed(),
+            boardPhase: 'placing',
+            completedLines: Array(LINES.length).fill(false),
+            selectedBankIndex: null,
+        };
+    }
+
+    function loadState() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) return Object.assign(defaultState(), JSON.parse(raw));
+        } catch (e) {}
+        return defaultState();
+    }
+
+    function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // ---------- render ----------
+
+    function render() {
+        document.getElementById('step-list').classList.toggle('active', state.step === 'list');
+        document.getElementById('step-board').classList.toggle('active', state.step === 'board');
+        if (state.step === 'list') renderList();
+        else renderBoard();
+    }
+
+    function renderList() {
+        const listEl = document.getElementById('pool-list');
+        listEl.innerHTML = '';
+        state.pool.forEach((item, idx) => {
+            const row = document.createElement('div');
+            row.className = 'pool-row';
+
+            if (item.max > 1) {
+                row.innerHTML = `
+                    <div class="stepper">
+                        <button type="button" class="mini-btn" data-action="dec" data-idx="${idx}">−</button>
+                        <span class="stepper-count">${item.count}</span>
+                        <button type="button" class="mini-btn" data-action="inc" data-idx="${idx}">+</button>
+                    </div>
+                    <input type="text" class="pool-text" data-idx="${idx}">
+                    <span class="pool-hint">up to ${item.max}×</span>
+                    <button type="button" class="mini-btn del" data-idx="${idx}">×</button>
+                `;
+            } else {
+                row.innerHTML = `
+                    <input type="checkbox" class="pool-check" data-idx="${idx}" ${item.count > 0 ? 'checked' : ''}>
+                    <input type="text" class="pool-text" data-idx="${idx}">
+                    <button type="button" class="mini-btn del" data-idx="${idx}">×</button>
+                `;
+            }
+            row.querySelector('.pool-text').value = item.text;
+            listEl.appendChild(row);
+        });
+        updateCountDisplay();
+    }
+
+    function updateCountDisplay() {
+        const total = state.pool.reduce((s, i) => s + i.count, 0);
+        const el = document.getElementById('count-display');
+        const confirmBtn = document.getElementById('confirm-list-btn');
+        const diff = 24 - total;
+
+        if (diff === 0) {
+            el.textContent = `${total} / 24 selected — ready!`;
+            el.className = 'count-display ok';
+            confirmBtn.classList.remove('disabled');
+        } else if (diff > 0) {
+            el.textContent = `${total} / 24 selected — choose ${diff} more`;
+            el.className = 'count-display bad';
+            confirmBtn.classList.add('disabled');
+        } else {
+            el.textContent = `${total} / 24 selected — remove ${-diff}`;
+            el.className = 'count-display bad';
+            confirmBtn.classList.add('disabled');
+        }
+    }
+
+    function allFilled() {
+        return state.placement.every((v, i) => i === 12 || v !== null);
+    }
+
+    function renderBoard() {
+        const grid = document.getElementById('bingo-grid');
+        grid.innerHTML = '';
+        for (let i = 0; i < 25; i++) grid.appendChild(buildCell(i));
+
+        renderBank();
+
+        const bankWrap = document.getElementById('bank-wrap');
+        const playingControls = document.getElementById('playing-controls');
+        const placingInstructions = document.getElementById('placing-instructions');
+        const playingInstructions = document.getElementById('playing-instructions');
+        const confirmBoardBtn = document.getElementById('confirm-board-btn');
+
+        if (state.boardPhase === 'placing') {
+            bankWrap.classList.remove('hidden');
+            playingControls.classList.add('hidden');
+            placingInstructions.classList.remove('hidden');
+            playingInstructions.classList.add('hidden');
+            confirmBoardBtn.classList.toggle('disabled', !allFilled());
+        } else {
+            bankWrap.classList.add('hidden');
+            playingControls.classList.remove('hidden');
+            placingInstructions.classList.add('hidden');
+            playingInstructions.classList.remove('hidden');
+        }
+    }
+
+    function buildCell(i) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+
+        if (i === 12) {
+            cell.classList.add('free');
+            cell.textContent = '⭐ FREE';
+            return cell;
+        }
+
+        const val = state.placement[i];
+
+        if (state.boardPhase === 'placing') {
+            if (val === null) {
+                cell.classList.add('empty');
+                cell.textContent = '+';
+            } else {
+                cell.textContent = state.texts[val];
+            }
+        } else {
+            cell.textContent = state.texts[val];
+            cell.classList.add(state.confirmed[i] ? 'confirmed' : 'unconfirmed');
+        }
+
+        cell.addEventListener('click', () => onCellClick(i));
+        return cell;
+    }
+
+    function renderBank() {
+        const bankEl = document.getElementById('bank');
+        bankEl.innerHTML = '';
+        if (state.boardPhase !== 'placing') return;
+
+        const placedIdxs = new Set(state.placement.filter(v => v !== null && v !== 'FREE'));
+        state.texts.forEach((text, idx) => {
+            if (placedIdxs.has(idx)) return;
+            const chip = document.createElement('div');
+            chip.className = 'chip' + (state.selectedBankIndex === idx ? ' selected' : '');
+            chip.textContent = text;
+            chip.addEventListener('click', () => onChipClick(idx));
+            bankEl.appendChild(chip);
+        });
+    }
+
+    // ---------- actions ----------
+
+    function confirmList() {
+        const total = state.pool.reduce((s, i) => s + i.count, 0);
+        if (total !== 24) return;
+
+        const texts = [];
+        state.pool.forEach(item => {
+            for (let k = 0; k < item.count; k++) texts.push(item.text);
+        });
+        shuffleArray(texts);
+
+        state.texts = texts;
+        state.placement = emptyPlacement();
+        state.confirmed = emptyConfirmed();
+        state.completedLines = Array(LINES.length).fill(false);
+        state.boardPhase = 'placing';
+        state.selectedBankIndex = null;
+        state.step = 'board';
+        saveState();
+        render();
+    }
+
+    function onChipClick(idx) {
+        if (state.boardPhase !== 'placing') return;
+        state.selectedBankIndex = (state.selectedBankIndex === idx) ? null : idx;
+        renderBoard();
+    }
+
+    function onCellClick(i) {
+        if (i === 12) return;
+
+        if (state.boardPhase === 'placing') {
+            const cur = state.placement[i];
+            if (state.selectedBankIndex !== null) {
+                state.placement[i] = state.selectedBankIndex;
+                state.selectedBankIndex = null;
+            } else if (cur !== null) {
+                state.placement[i] = null;
+            }
+            saveState();
+            renderBoard();
+        } else {
+            state.confirmed[i] = !state.confirmed[i];
+            const newly = computeNewlyCompletedLines();
+            saveState();
+            renderBoard();
+            if (newly.length > 0) celebrate(newly.length);
+        }
+    }
+
+    function computeNewlyCompletedLines() {
+        const prev = state.completedLines || Array(LINES.length).fill(false);
+        const current = LINES.map(line => line.every(i => state.confirmed[i]));
+        const newly = [];
+        current.forEach((val, idx) => { if (val && !prev[idx]) newly.push(idx); });
+        state.completedLines = current;
+        return newly;
+    }
+
+    function celebrate(n) {
+        const banner = document.getElementById('bingo-banner');
+        banner.textContent = n > 1 ? `🎉 BINGO ×${n}! 🎉` : '🎉 BINGO! 🎉';
+        banner.classList.add('show');
+
+        confetti({ particleCount: 150, spread: 90, origin: { y: 0.5 } });
+        setTimeout(() => confetti({ particleCount: 100, spread: 120, origin: { y: 0.4 } }), 250);
+
+        clearTimeout(bannerTimer);
+        bannerTimer = setTimeout(() => banner.classList.remove('show'), 3000);
+    }
+
+    function shuffleBoard() {
+        const idxs = shuffleArray(state.texts.map((_, i) => i));
+        let p = 0;
+        for (let i = 0; i < 25; i++) {
+            if (i === 12) continue;
+            state.placement[i] = idxs[p++];
+        }
+        state.selectedBankIndex = null;
+        saveState();
+        renderBoard();
+    }
+
+    function confirmBoard() {
+        if (!allFilled()) return;
+        state.boardPhase = 'playing';
+        state.selectedBankIndex = null;
+        saveState();
+        renderBoard();
+    }
+
+    function resetMarks() {
+        state.confirmed = emptyConfirmed();
+        state.completedLines = Array(LINES.length).fill(false);
+        saveState();
+        renderBoard();
+    }
+
+    function rearrange() {
+        state.boardPhase = 'placing';
+        saveState();
+        renderBoard();
+    }
+
+    function editList() {
+        if (confirm('Go back and edit your list? This resets your current board and progress.')) {
+            state.step = 'list';
+            saveState();
+            render();
+        }
+    }
+
+    function resetToDefaults() {
+        if (confirm('Reset the list back to the original 25 items? This discards any edits.')) {
+            const fresh = defaultState();
+            state.pool = fresh.pool;
+            saveState();
+            renderList();
+        }
+    }
+
+    // ---------- wiring ----------
+
+    document.addEventListener('DOMContentLoaded', () => {
+        state = loadState();
+
+        const listEl = document.getElementById('pool-list');
+
+        listEl.addEventListener('click', e => {
+            const delBtn = e.target.closest('.del');
+            if (delBtn) {
+                state.pool.splice(+delBtn.dataset.idx, 1);
+                saveState();
+                renderList();
+                return;
+            }
+            const mini = e.target.closest('.mini-btn[data-action]');
+            if (mini) {
+                const item = state.pool[+mini.dataset.idx];
+                if (mini.dataset.action === 'inc') item.count = Math.min(item.max, item.count + 1);
+                else item.count = Math.max(0, item.count - 1);
+                saveState();
+                renderList();
+            }
+        });
+
+        listEl.addEventListener('change', e => {
+            if (e.target.classList.contains('pool-check')) {
+                state.pool[+e.target.dataset.idx].count = e.target.checked ? 1 : 0;
+                saveState();
+                updateCountDisplay();
+            }
+        });
+
+        listEl.addEventListener('input', e => {
+            if (e.target.classList.contains('pool-text')) {
+                state.pool[+e.target.dataset.idx].text = e.target.value;
+                saveState();
+            }
+        });
+
+        document.getElementById('add-item-form').addEventListener('submit', e => {
+            e.preventDefault();
+            const input = document.getElementById('add-item-input');
+            const val = input.value.trim();
+            if (!val) return;
+            state.pool.push({ id: uid(), text: val, count: 1, max: 1 });
+            input.value = '';
+            saveState();
+            renderList();
+        });
+
+        document.getElementById('confirm-list-btn').addEventListener('click', e => {
+            e.preventDefault();
+            confirmList();
+        });
+
+        document.getElementById('reset-defaults-btn').addEventListener('click', resetToDefaults);
+
+        document.getElementById('edit-list-link').addEventListener('click', e => {
+            e.preventDefault();
+            editList();
+        });
+
+        document.getElementById('shuffle-btn').addEventListener('click', e => {
+            e.preventDefault();
+            shuffleBoard();
+        });
+
+        document.getElementById('confirm-board-btn').addEventListener('click', e => {
+            e.preventDefault();
+            confirmBoard();
+        });
+
+        document.getElementById('reset-marks-btn').addEventListener('click', e => {
+            e.preventDefault();
+            resetMarks();
+        });
+
+        document.getElementById('rearrange-btn').addEventListener('click', e => {
+            e.preventDefault();
+            rearrange();
+        });
+
+        render();
+    });
+})();
+</script>
+</body>
+</html>
