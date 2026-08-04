@@ -25,16 +25,20 @@
 
         .btn { border-width: 1px; }
         .btn.disabled { opacity: 0.35; pointer-events: none; }
-        .container { padding: 1.5rem 0.5rem; }
+        body { padding: 10px 14px; }
+        .container { padding: 1.5rem 0.5rem; width: 100%; }
     </style>
     <!-- ============================================================
          END EVENT CONFIG
          ============================================================ -->
 
     <style>
+        *, *::before, *::after { box-sizing: border-box; }
+
         a.back { align-self: flex-start; margin-left: 4px; color: var(--text); }
 
-        #step-board .emoji { line-height: 1; margin-top: 0; margin-bottom: 0.2em; }
+        /* same header treatment on every step */
+        .emoji { line-height: 1; margin-top: 0; margin-bottom: 0.2em; }
 
         .subtitle { font-size: 0.7rem; color: var(--placeholder); margin-top: -8px; margin-bottom: 1.2em; max-width: 420px; }
 
@@ -100,15 +104,17 @@
 
         .bingo-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(5, minmax(0, 1fr));
             gap: 5px;
             width: 100%;
             max-width: 420px;
             margin: 0 auto;
+            overflow-x: auto;
         }
 
         .cell {
             position: relative;
+            min-width: 0;
             aspect-ratio: 1 / 1;
             display: flex;
             align-items: center;
@@ -120,6 +126,7 @@
             border-radius: 10px;
             border: 1.5px solid var(--border);
             cursor: pointer;
+            overflow-wrap: break-word;
             word-break: break-word;
             transition: transform .15s ease, background .2s ease, color .2s ease;
             background: rgba(255,255,255,0.45);
@@ -141,16 +148,19 @@
             flex-wrap: wrap;
             gap: 6px;
             justify-content: center;
-            max-width: 460px;
+            width: 100%;
+            max-width: 420px;
             margin: 16px auto;
         }
 
         .chip {
+            max-width: 100%;
             border: 1.5px solid var(--border);
             border-radius: 20px;
             padding: 5px 10px;
             font-size: 0.62rem;
             cursor: pointer;
+            overflow-wrap: break-word;
             background: rgba(255,255,255,0.5);
             color: var(--text);
             transition: transform .15s ease, background .2s ease, color .2s ease;
@@ -186,6 +196,7 @@
 <body>
 <div class="container">
     <div class="page active" id="step-list">
+        <div class="emoji">🎯</div>
         <h1>date night bingo</h1>
         <p class="subtitle">confirm your 24 squares — check or uncheck, edit the wording, or add your own</p>
 
@@ -351,7 +362,7 @@
                         <button type="button" class="mini-btn" data-action="inc" data-idx="${idx}">+</button>
                     </div>
                     <input type="text" class="pool-text" data-idx="${idx}">
-                    <span class="pool-hint">up to ${item.max}×</span>
+                    <span class="pool-hint">×${item.count} of 24</span>
                     <button type="button" class="mini-btn del" data-idx="${idx}">×</button>
                 `;
             } else {
@@ -577,7 +588,7 @@
     }
 
     function resetToDefaults() {
-        if (confirm('Reset the list back to the original 25 items? This discards any edits.')) {
+        if (confirm('Reset the list back to the original 24 items? This discards any edits.')) {
             const fresh = defaultState();
             state.pool = fresh.pool;
             saveState();
