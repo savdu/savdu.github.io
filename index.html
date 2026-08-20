@@ -60,6 +60,61 @@
         }
 
         .textedit-body { padding: 14px 16px; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .gate-win {
+            width: 300px;
+            background: white;
+            border: 1px solid #b0b0b0;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            overflow: hidden;
+            font-family: 'Menlo', monospace;
+            font-size: small;
+        }
+
+        .gate-body {
+            padding: 18px 16px;
+            text-align: center;
+        }
+
+        .gate-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .pw-input {
+            font-family: 'Menlo', monospace;
+            font-size: small;
+            padding: 4px 6px;
+            border: 1px solid #b0b0b0;
+            border-radius: 2px;
+            width: 120px;
+        }
+
+        .pw-input.shake {
+            animation: shake 0.3s;
+            border-color: #ff5f57;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
     </style>
 </head>
 <body>
@@ -68,12 +123,12 @@
     <p>i'm sav and this is my stuff :)</p>
 
     <p>[0] music<br>
-    <a href="https://cornerclubofficial.com">corner club</a><br>
+    <a href="https://cornerclubofficial.com">corner club</a> (hint: type snake on the page)<br>
     </p>
 
     <p>[1] writing<br>
-    <a href="writing/guest-room.html">[2026-06-07] guest room</a><br>
-    <a href="writing/nightmare.html">[2026-05-05] nightmare</a><br>    
+    <a href="writing/guest-room.html" onclick="return openPasswordGate(event, this.href)">*[2026-06-07] guest room</a><br>
+    <a href="writing/nightmare.html" onclick="return openPasswordGate(event, this.href)">*[2026-05-05] nightmare</a><br>
     <a href="writing/miami.html">[2025-12-30] 10 hours at the miami airport</a><br>
     <a href="writing/sf.html">[2025-04-10] when i think about san francisco</a><br>
     <a href="writing/ezra.html">[2023-10-30] the ezra song</a><br>
@@ -82,8 +137,11 @@
 
     <p>[2] projects<br>
     <a href="https://hyphenate.cafe">hyphenate</a><br>
-    <a href="thoughts.html">thoughts</a><br>
-    <a href="friends/index.html">things other people made</a><br>
+    <a href="thoughts.html" id="thoughts-link" onclick="return openGate(event)">thoughts</a><br>
+    <a href="date-night.html" onclick="return openPasswordGate(event, this.href)">*date night bingo</a><br>
+    <a href="dusty.html" onclick="return openPasswordGate(event, this.href)">*how to win your crush</a><br>
+    <a href="#" onclick="return openBetaGate(event)">anxiety</a><br>
+    <a href="friends/index.html">family & friends' stuff</a><br>
     <!-- <a href="other/art.html">art forms i've tried</a> [pottery, painting, cricut, roving-weaving] <br> -->
     </p>
 
@@ -93,12 +151,15 @@
     </p>
     
     <p>[4] achievements<br>
-    - winner of sa best diagram award @ stripe sko 2026<br>
-    - fastest typer on amer ssmb team to date<br>
+    - scored the winning shot at whirlyball during sa summit<br>
+    - winner of best diagram award @ sko 2026<br>
+    - fastest typer on amer startups team to date<br>
     - 2017 best poster award for princeton cs independent work<br>
     - runner up for rm idol 2014<br>
     - 2400 sat
     </p>
+
+    <p><i>*secret zone! earn my trust to learn the password.</i></p>
 
 </div>
 
@@ -122,7 +183,131 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="gate-overlay">
+    <div class="gate-win">
+        <div class="textedit-bar">
+            <div class="traffic-lights">
+                <div class="tl tl-red" onclick="closeGate()"></div>
+            </div>
+            <div class="textedit-title">notice.txt</div>
+        </div>
+        <div class="gate-body">
+            you are entering a judgment free zone
+            <div class="gate-buttons">
+                <button onclick="closeGate()">nvm</button>
+                <button onclick="proceedGate()">proceed</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="pw-gate-overlay">
+    <div class="gate-win">
+        <div class="textedit-bar">
+            <div class="traffic-lights">
+                <div class="tl tl-red" onclick="closePasswordGate()"></div>
+            </div>
+            <div class="textedit-title">warning.txt</div>
+        </div>
+        <div class="gate-body">
+            oops! you are entering a vulnerable zone. what's the password?
+            <div class="gate-buttons">
+                <input type="password" id="pw-input" class="pw-input" autocomplete="off">
+                <button onclick="submitPassword()">enter</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="beta-gate-overlay">
+    <div class="gate-win">
+        <div class="textedit-bar">
+            <div class="traffic-lights">
+                <div class="tl tl-red" onclick="closeBetaGate()"></div>
+            </div>
+            <div class="textedit-title">notice.txt</div>
+        </div>
+        <div class="gate-body">
+            mobile app in beta. contact for early access.
+            <div class="gate-buttons">
+                <button onclick="closeBetaGate()">ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script>
+    function openGate(e) {
+        e.preventDefault();
+        document.getElementById('gate-overlay').classList.add('open');
+        return false;
+    }
+
+    function closeGate() {
+        document.getElementById('gate-overlay').classList.remove('open');
+    }
+
+    function proceedGate() {
+        window.location.href = document.getElementById('thoughts-link').href;
+    }
+
+    document.getElementById('gate-overlay').addEventListener('click', (e) => {
+        if (e.target.id === 'gate-overlay') closeGate();
+    });
+
+    const PASSWORD = 'bobbles';
+    let pwTarget = null;
+    const pwInput = document.getElementById('pw-input');
+
+    function openPasswordGate(e, target) {
+        e.preventDefault();
+        pwTarget = target;
+        pwInput.value = '';
+        pwInput.classList.remove('shake');
+        document.getElementById('pw-gate-overlay').classList.add('open');
+        setTimeout(() => pwInput.focus(), 0);
+        return false;
+    }
+
+    function closePasswordGate() {
+        document.getElementById('pw-gate-overlay').classList.remove('open');
+    }
+
+    function submitPassword() {
+        if (pwInput.value === PASSWORD) {
+            window.location.href = pwTarget;
+        } else {
+            pwInput.classList.remove('shake');
+            void pwInput.offsetWidth;
+            pwInput.classList.add('shake');
+            pwInput.value = '';
+            pwInput.focus();
+        }
+    }
+
+    pwInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') submitPassword();
+    });
+
+    document.getElementById('pw-gate-overlay').addEventListener('click', (e) => {
+        if (e.target.id === 'pw-gate-overlay') closePasswordGate();
+    });
+
+    function openBetaGate(e) {
+        e.preventDefault();
+        document.getElementById('beta-gate-overlay').classList.add('open');
+        return false;
+    }
+
+    function closeBetaGate() {
+        document.getElementById('beta-gate-overlay').classList.remove('open');
+    }
+
+    document.getElementById('beta-gate-overlay').addEventListener('click', (e) => {
+        if (e.target.id === 'beta-gate-overlay') closeBetaGate();
+    });
+</script>
 <script>
     function toggle(el) {
         el.classList.toggle('checked');
@@ -196,6 +381,13 @@
 
     document.getElementById('tl-red').addEventListener('click', () => {
         win.style.display = 'none';
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        closeGate();
+        closePasswordGate();
+        closeBetaGate();
     });
 </script>
 </body>
